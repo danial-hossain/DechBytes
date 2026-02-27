@@ -13,16 +13,21 @@ const schemaPath = path.join(__dirname, 'database.sql');
 const seedPath = path.join(__dirname, 'seed.sql');
 
 const dbName = process.env.DB_DATABASE;
+const rawServer = process.env.DB_SERVER || 'localhost';
+const [serverHost, serverInstance] = rawServer.split('\\');
+const parsedPort = process.env.DB_PORT ? Number(process.env.DB_PORT) : undefined;
 
 // Config for the specific database
 const dbConfig = {
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
-  server: process.env.DB_SERVER,
+  server: serverHost,
   database: dbName,
+  ...(!serverInstance && Number.isFinite(parsedPort) ? { port: parsedPort } : {}),
   options: {
     encrypt: process.env.DB_ENCRYPT === 'true',
     trustServerCertificate: process.env.DB_TRUST_SERVER_CERTIFICATE === 'true',
+    ...(serverInstance ? { instanceName: serverInstance } : {}),
   },
 };
 

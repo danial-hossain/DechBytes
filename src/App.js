@@ -25,11 +25,7 @@ import OrderTracking from "./Pages/OrderTracking"; // make sure the path is corr
 
 
 // Product Pages (category lists)
-import DesktopList from "./Pages/Desktop";
-import LaptopList from "./Pages/Laptop";
-import ArmList from "./Pages/Arm";
-import LegList from "./Pages/Leg";
-import ElectronicsList from "./Pages/Electronics";
+import ProductListing from "./Pages/ProductListing";
 
 // Product Detail Pages
 import Arm from "./Pages/ProductDetail/arm";
@@ -100,7 +96,7 @@ function App() {
             path="/desktops"
             element={
               <LayoutWithHeaderFooter>
-                <DesktopList />
+                <ProductListing />
               </LayoutWithHeaderFooter>
             }
           />
@@ -108,7 +104,7 @@ function App() {
             path="/laptops"
             element={
               <LayoutWithHeaderFooter>
-                <LaptopList />
+                <ProductListing />
               </LayoutWithHeaderFooter>
             }
           />
@@ -116,7 +112,7 @@ function App() {
             path="/arms"
             element={
               <LayoutWithHeaderFooter>
-                <ArmList />
+                <ProductListing />
               </LayoutWithHeaderFooter>
             }
           />
@@ -124,7 +120,7 @@ function App() {
             path="/legs"
             element={
               <LayoutWithHeaderFooter>
-                <LegList />
+                <ProductListing />
               </LayoutWithHeaderFooter>
             }
           />
@@ -132,7 +128,7 @@ function App() {
             path="/electronics"
             element={
               <LayoutWithHeaderFooter>
-                <ElectronicsList />
+                <ProductListing />
               </LayoutWithHeaderFooter>
             }
           />
