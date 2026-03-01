@@ -13,8 +13,8 @@ export async function createAddress(addressData) {
         .input('mobile', sql.NVarChar(20), addressData.mobile)
         .input('userId', sql.Int, addressData.userId)
         .query(`
-            INSERT INTO Addresses (address_line, city, state, pincode, country, mobile, userId, createdAt, updatedAt)
-            VALUES (@address_line, @city, @state, @pincode, @country, @mobile, @userId, GETDATE(), GETDATE());
+            INSERT INTO Addresses (address_line, city, state, pincode, country, mobile, userId, created_at)
+            VALUES (@address_line, @city, @state, @pincode, @country, @mobile, @userId, GETDATE());
             SELECT SCOPE_IDENTITY() AS id;
         `);
 
@@ -35,12 +35,10 @@ export async function findAddressesByUserId(userId) {
                 pincode,
                 country,
                 mobile,
-                status,
                 userId,
-                createdAt,
-                updatedAt
+                created_at
             FROM Addresses 
-            WHERE userId = @userId AND status = 1
+            WHERE userId = @userId
         `);
     return result.recordset;
 }
@@ -58,8 +56,7 @@ export async function findAddressById(addressId) {
 export async function updateAddressById(addressId, updateData) {
     const pool = await connectMssqlDB();
     const request = pool.request()
-        .input('id', sql.Int, addressId)
-        .input('updatedAt', sql.DateTime2, new Date());
+        .input('id', sql.Int, addressId);
 
     let updateQueryParts = [];
 
@@ -87,23 +84,19 @@ export async function updateAddressById(addressId, updateData) {
         updateQueryParts.push('mobile = @mobile');
         request.input('mobile', sql.NVarChar(20), updateData.mobile);
     }
-    if (updateData.status !== undefined) {
-        updateQueryParts.push('status = @status');
-        request.input('status', sql.Bit, updateData.status);
-    }
 
     if (updateQueryParts.length === 0) return null;
 
-    const updateQuery = `UPDATE Addresses SET ${updateQueryParts.join(', ')}, updatedAt = @updatedAt WHERE id = @id`;
+    const updateQuery = `UPDATE Addresses SET ${updateQueryParts.join(', ')} WHERE id = @id`;
     await request.query(updateQuery);
 
     return findAddressById(addressId);
 }
 
-// ===== DELETE ADDRESS (SOFT DELETE) =====
+// ===== DELETE ADDRESS =====
 export async function deleteAddress(addressId) {
     const pool = await connectMssqlDB();
     await pool.request()
         .input('id', sql.Int, addressId)
-        .query('UPDATE Addresses SET status = 0, updatedAt = GETDATE() WHERE id = @id'); // Soft delete
+        .query('DELETE FROM Addresses WHERE id = @id');
 }

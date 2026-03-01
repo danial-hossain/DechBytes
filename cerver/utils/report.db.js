@@ -13,7 +13,7 @@ export async function createReport(reportData) {
         .input('userId', sql.Int, reportData.userId)
         .input('opinion', sql.NVarChar(sql.MAX), reportData.opinion)
         .query(`
-            INSERT INTO Reports (userId, opinion, createdAt, updatedAt)
+            INSERT INTO Reports (user_id, opinion, created_at, updated_at)
             VALUES (@userId, @opinion, GETDATE(), GETDATE());
             SELECT SCOPE_IDENTITY() AS id;
         `);
@@ -24,10 +24,10 @@ export async function findAllReportsWithUser() {
     const pool = await connectMssqlDB();
     const result = await pool.request()
         .query(`
-            SELECT R.id, R.opinion, R.createdAt, R.updatedAt,
+            SELECT R.id, R.opinion, R.created_at, R.updated_at,
                    U.name AS userName, U.email AS userEmail, U.id AS userId
             FROM Reports R
-            JOIN Users U ON R.userId = U.id
+            JOIN Users U ON R.user_id = U.id
         `);
     return result.recordset;
 }

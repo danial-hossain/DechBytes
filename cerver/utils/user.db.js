@@ -16,10 +16,10 @@ export async function createUser(userData) {
         .input('mobile', sql.NVarChar(20), userData.mobile)
         .input('password', sql.NVarChar(255), userData.password)
         .input('otp', sql.NVarChar(255), userData.otp)
-        .input('otpExpires', sql.DateTime2, userData.otpExpires)
+        .input('otp_expires', sql.DateTime2, userData.otpExpires)
         .query(`
-            INSERT INTO Users (name, email, mobile, password, otp, otpExpires, createdAt, updatedAt)
-            VALUES (@name, @email, @mobile, @password, @otp, @otpExpires, GETDATE(), GETDATE());
+            INSERT INTO Users (name, email, mobile, password, otp, otp_expires, created_at, updated_at)
+            VALUES (@name, @email, @mobile, @password, @otp, @otp_expires, GETDATE(), GETDATE());
             SELECT SCOPE_IDENTITY() AS id;
         `);
     return { id: result.recordset[0].id, ...userData }; // Return id and other data
@@ -37,7 +37,7 @@ export async function updateUserById(id, updateData) {
     const pool = await connectMssqlDB();
     const request = pool.request()
         .input('id', sql.Int, id)
-        .input('updatedAt', sql.DateTime2, new Date());
+        .input('updated_at', sql.DateTime2, new Date());
 
     let updateQueryParts = [];
     if (updateData.name !== undefined) {
@@ -61,8 +61,8 @@ export async function updateUserById(id, updateData) {
         request.input('otp', sql.NVarChar(255), updateData.otp);
     }
     if (updateData.otpExpires !== undefined) {
-        updateQueryParts.push('otpExpires = @otpExpires');
-        request.input('otpExpires', sql.DateTime2, updateData.otpExpires);
+        updateQueryParts.push('otp_expires = @otp_expires');
+        request.input('otp_expires', sql.DateTime2, updateData.otpExpires);
     }
     if (updateData.last_login_date !== undefined) {
         updateQueryParts.push('last_login_date = @last_login_date');
@@ -78,7 +78,7 @@ export async function updateUserById(id, updateData) {
         return null; // No fields to update
     }
 
-    const updateQuery = `UPDATE Users SET ${updateQueryParts.join(', ')}, updatedAt = @updatedAt WHERE id = @id`;
+    const updateQuery = `UPDATE Users SET ${updateQueryParts.join(', ')}, updated_at = @updated_at WHERE id = @id`;
     await request.query(updateQuery);
 
     return findUserById(id); // Return the updated user

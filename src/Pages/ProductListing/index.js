@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
+import { buildApiUrl } from "../../config/api";
 import "./style.css";
 
 const MIN_PRICE = 0;
@@ -104,7 +105,7 @@ const ProductListing = () => {
 
       try {
         const response = await fetch(
-          `http://localhost:5001/api/categories/${currentCategory.apiCategory}/products`
+          buildApiUrl(`/api/categories/${currentCategory.apiCategory}/products`)
         );
         const data = await response.json();
 
@@ -172,7 +173,7 @@ const ProductListing = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:5001/api/cart/add", {
+      const response = await fetch(buildApiUrl("/api/cart/add"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

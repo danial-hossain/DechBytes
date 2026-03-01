@@ -36,7 +36,7 @@ router.get("/users", auth, async (req, res) => {
     const currentUser = await findUserById(req.userId);
     if (!currentUser || currentUser.role !== "ADMIN") return res.status(403).json({ message: "Access denied" });
 
-    const users = await findUsers(["name", "email", "role", "status", "createdAt"]);
+    const users = await findUsers(["name", "email", "role", "status", "created_at"]);
     res.json({ users });
   } catch (err) {
     console.error("Dashboard users error:", err);

@@ -17,7 +17,7 @@ router.get("/users", auth, async (req, res) => {
     }
 
     // fetch users without sending password hash
-    const users = await findUsers(["name", "email", "role", "status", "createdAt"]);
+    const users = await findUsers(["name", "email", "role", "status", "created_at"]);
 
     res.json({ success: true, users });
   } catch (err) {

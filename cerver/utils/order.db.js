@@ -18,7 +18,7 @@ export async function findUserOrders(userId) {
     const pool = await connectMssqlDB();
     const result = await pool.request()
         .input('userId', sql.Int, userId)
-        .query('SELECT * FROM Orders WHERE userId = @userId ORDER BY createdAt DESC');
+        .query('SELECT * FROM Orders WHERE userId = @userId ORDER BY created_at DESC');
     return result.recordset;
 }
 
@@ -43,7 +43,7 @@ export async function createOrder(orderData, productDetails) {
             .input('totalAmt', sql.Decimal(10, 2), orderData.totalAmt)
             .input('invoice_receipt', sql.NVarChar(sql.MAX), orderData.invoice_receipt)
             .query(`
-                INSERT INTO Orders (userId, orderId, paymentId, payment_status, delivery_name, delivery_email, delivery_phone, delivery_address_line, subTotalAmt, totalAmt, invoice_receipt, createdAt, updatedAt)
+                INSERT INTO Orders (userId, orderId, paymentId, payment_status, delivery_name, delivery_email, delivery_phone, delivery_address_line, subTotalAmt, totalAmt, invoice_receipt, created_at, updated_at)
                 VALUES (@userId, @orderId, @paymentId, @payment_status, @delivery_name, @delivery_email, @delivery_phone, @delivery_address_line, @subTotalAmt, @totalAmt, @invoice_receipt, GETDATE(), GETDATE());
                 SELECT SCOPE_IDENTITY() AS id;
             `);

@@ -1,187 +1,148 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { useAuth } from '../../../hooks/useAuth';  // ✅ Import useAuth
+import { useAuth } from '../../../hooks/useAuth';
+import { buildApiUrl } from '../../../config/api';
 import './style.css';
 
-const ProfileInformation = () => {
+const PasswordChange = () => {
   const navigate = useNavigate();
-  const { userInfo, updateProfile } = useAuth();  // ✅ Get updateProfile
+  const { userInfo } = useAuth();
   const [form, setForm] = useState({
-    name: '',
-    email: '',
-    mobile: '',
-    address_details: [],
-    password: '',
+    currentPassword: '',
+    newPassword: '',
     confirmPassword: '',
   });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // Fetch user profile
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const { data } = await axios.get('http://localhost:5001/api/user/profile', {
-          withCredentials: true,
-        });
-        
-        const addresses = data.address_details || [];
-        
-        setForm({
-          name: data.name || '',
-          email: data.email || '',
-          mobile: data.mobile || '',
-          address_details: addresses.length ? addresses : [],
-          password: '',
-          confirmPassword: '',
-        });
-        setLoading(false);
-      } catch (err) {
-        setError(err.response?.data?.message || 'Failed to fetch profile');
-        setLoading(false);
-        if (err.response?.status === 401) navigate('/login');
-      }
-    };
-
-    fetchProfile();
-  }, [navigate]);
-
-  const handleChange = (e, index, field) => {
-    if (field) {
-      const updated = [...form.address_details];
-      updated[index] = { ...updated[index], [field]: e.target.value };
-      setForm({ ...form, address_details: updated });
-    } else {
-      setForm({ ...form, [e.target.name]: e.target.value });
+    if (!userInfo) {
+      navigate('/login');
     }
-  };
+  }, [userInfo, navigate]);
 
-  const addAddressField = () => {
-    setForm({ 
-      ...form, 
-      address_details: [
-        ...form.address_details, 
-        { address_line: '', city: '', state: '', pincode: '', country: '', mobile: '' }
-      ] 
-    });
-  };
-
-  const removeAddressField = (i) => {
-    setForm({ 
-      ...form, 
-      address_details: form.address_details.filter((_, idx) => idx !== i) 
-    });
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
-  
-    if (form.password && form.password !== form.confirmPassword) {
+
+    if (!form.currentPassword) {
+      setError('Current password is required');
+      return;
+    }
+
+    if (!form.newPassword) {
+      setError('New password is required');
+      return;
+    }
+
+    if (form.newPassword.length < 6) {
+      setError('New password must be at least 6 characters');
+      return;
+    }
+
+    if (form.newPassword !== form.confirmPassword) {
       setError('Passwords do not match');
       return;
     }
-  
+
+    setLoading(true);
+
     try {
-      const updateData = { ...form };
-      if (!updateData.password) delete updateData.password;
-      delete updateData.confirmPassword;
-  
-      // Send to backend
-      const response = await axios.put('http://localhost:5001/api/user/profile/update', updateData, {
-        withCredentials: true,
-      });
-  
-      // ✅ Update AuthContext with new data
+      // First verify current password by attempting login
+      const loginCheck = await axios.post(
+        buildApiUrl('/api/user/login'),
+        { email: userInfo.email, password: form.currentPassword },
+        { withCredentials: true }
+      );
+
+      if (!loginCheck.data.success) {
+        throw new Error('Current password is incorrect');
+      }
+
+      // Update password
+      const response = await axios.put(
+        buildApiUrl('/api/user/profile/update'),
+        { password: form.newPassword },
+        { withCredentials: true }
+      );
+
       if (response.data.success) {
-        updateProfile(response.data.data);  // This updates userInfo in context
-        
-        setSuccess('Profile updated successfully');
-        setTimeout(() => navigate('/profile'), 1500);
+        setSuccess('Password changed successfully!');
+        setForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+        setTimeout(() => navigate('/profile'), 2000);
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Update failed');
+      setError(err.response?.data?.message || err.message || 'Password change failed');
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (loading) return <div className="profile-loading">Loading...</div>;
+  if (!userInfo) return <div className="password-loading">Loading...</div>;
 
   return (
-    <section className="profile-section">
-      <div className="profile-container">
-        <h2 className="profile-title">Edit Profile</h2>
-        {error && <p className="profile-error">{error}</p>}
-        {success && <p className="profile-success">{success}</p>}
+    <section className="password-section">
+      <div className="password-container">
+        <h2 className="password-title">Change Password</h2>
+        {error && <p className="password-error">{error}</p>}
+        {success && <p className="password-success">{success}</p>}
 
-        <form onSubmit={handleSubmit} className="profile-form">
-          <label>Name:</label>
-          <input type="text" name="name" value={form.name} onChange={handleChange} required />
+        <form onSubmit={handleSubmit} className="password-form">
+          <div className="form-group">
+            <label>Current Password:</label>
+            <input
+              type="password"
+              name="currentPassword"
+              value={form.currentPassword}
+              onChange={handleChange}
+              placeholder="Enter your current password"
+              required
+            />
+          </div>
 
-          <label>Email:</label>
-          <input type="email" name="email" value={form.email} onChange={handleChange} required />
+          <div className="form-group">
+            <label>New Password:</label>
+            <input
+              type="password"
+              name="newPassword"
+              value={form.newPassword}
+              onChange={handleChange}
+              placeholder="Enter new password (min 6 characters)"
+              required
+            />
+          </div>
 
-          <label>Mobile:</label>
-          <input type="text" name="mobile" value={form.mobile} onChange={handleChange} required />
+          <div className="form-group">
+            <label>Confirm New Password:</label>
+            <input
+              type="password"
+              name="confirmPassword"
+              value={form.confirmPassword}
+              onChange={handleChange}
+              placeholder="Confirm your new password"
+              required
+            />
+          </div>
 
-          <label>Addresses:</label>
-          {form.address_details.map((addr, i) => (
-            <div key={i} className="address-card" style={{ border: '1px solid #ccc', padding: '10px', margin: '10px 0' }}>
-              <input 
-                type="text" 
-                placeholder="Address Line" 
-                value={addr.address_line || ''} 
-                onChange={(e) => handleChange(e, i, 'address_line')} 
-              />
-              <input 
-                type="text" 
-                placeholder="City" 
-                value={addr.city || ''} 
-                onChange={(e) => handleChange(e, i, 'city')} 
-              />
-              <input 
-                type="text" 
-                placeholder="State" 
-                value={addr.state || ''} 
-                onChange={(e) => handleChange(e, i, 'state')} 
-              />
-              <input 
-                type="text" 
-                placeholder="Pincode" 
-                value={addr.pincode || ''} 
-                onChange={(e) => handleChange(e, i, 'pincode')} 
-              />
-              <input 
-                type="text" 
-                placeholder="Country" 
-                value={addr.country || ''} 
-                onChange={(e) => handleChange(e, i, 'country')} 
-              />
-              <input 
-                type="text" 
-                placeholder="Mobile" 
-                value={addr.mobile || ''} 
-                onChange={(e) => handleChange(e, i, 'mobile')} 
-              />
-              {form.address_details.length > 1 && (
-                <button type="button" onClick={() => removeAddressField(i)}>Remove</button>
-              )}
-            </div>
-          ))}
-          
-          <button type="button" onClick={addAddressField}>Add Address</button>
-
-          <label>New Password (optional):</label>
-          <input type="password" name="password" value={form.password} onChange={handleChange} placeholder="Leave blank to keep current" />
-
-          <label>Confirm Password:</label>
-          <input type="password" name="confirmPassword" value={form.confirmPassword} onChange={handleChange} placeholder="Confirm new password" />
-
-          <div className="profile-buttons">
-            <button type="submit" className="profile-save-btn">Save Changes</button>
-            <button type="button" onClick={() => navigate('/profile')} className="profile-cancel-btn">Cancel</button>
+          <div className="password-buttons">
+            <button type="submit" className="password-save-btn" disabled={loading}>
+              {loading ? 'Changing...' : 'Change Password'}
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/profile')}
+              className="password-cancel-btn"
+              disabled={loading}
+            >
+              Cancel
+            </button>
           </div>
         </form>
       </div>
@@ -189,4 +150,4 @@ const ProfileInformation = () => {
   );
 };
 
-export default ProfileInformation;
+export default PasswordChange;

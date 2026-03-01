@@ -13,7 +13,7 @@ export async function createHelp(helpData) {
         .input('email', sql.NVarChar(255), helpData.email)
         .input('message', sql.NVarChar(sql.MAX), helpData.message)
         .query(`
-            INSERT INTO Helps (email, message, createdAt)
+            INSERT INTO Helps (email, message, created_at)
             VALUES (@email, @message, GETDATE());
             SELECT SCOPE_IDENTITY() AS id;
         `);

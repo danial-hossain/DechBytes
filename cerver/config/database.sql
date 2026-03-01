@@ -134,6 +134,9 @@ IF COL_LENGTH('dbo.Addresses', 'pincode') IS NULL
 IF COL_LENGTH('dbo.Addresses', 'country') IS NULL 
     ALTER TABLE dbo.Addresses ADD country NVARCHAR(100);
 
+IF COL_LENGTH('dbo.Addresses', 'mobile') IS NULL 
+    ALTER TABLE dbo.Addresses ADD mobile NVARCHAR(20);
+
 IF COL_LENGTH('dbo.Addresses', 'is_default') IS NULL 
     ALTER TABLE dbo.Addresses ADD is_default BIT DEFAULT 0;
 
