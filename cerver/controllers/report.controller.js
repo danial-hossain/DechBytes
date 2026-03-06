@@ -1,39 +1,121 @@
 // controllers/report.controller.js
-import { createReport } from "../utils/report.db.js";
-//Imports the Report model to save reports in the database.
+import { createReport, findAllReportsWithUser } from "../utils/report.db.js";
 
+/**
+ * Create a new report (for authenticated users)
+ */
 export const createReportController = async (req, res) => {
-  //Exports an async controller function to handle creating reports.
   try {
     const { opinion } = req.body;
-    //Extracts opinion from the request body.
     const userId = req.userId;
-//Gets userId from req.userId (assumes user is authenticated)
 
+    console.log('Creating report - User ID:', userId);
+    console.log('Opinion:', opinion);
 
+    // Check if user is authenticated
     if (!userId) {
-      return res.status(401).json({ message: "User not authenticated" });
-      //Checks if the user is logged in.If not, sends 401 Unauthorized.
+      return res.status(401).json({ 
+        success: false,
+        message: "User not authenticated" 
+      });
     }
 
+    // Validate opinion
     if (!opinion || opinion.trim() === "") {
-      return res.status(400).json({ message: "Opinion is required" });
+      return res.status(400).json({ 
+        success: false,
+        message: "Opinion is required" 
+      });
     }
 
+    // Create report in database
     const newReport = await createReport({ userId, opinion });
-    //Creates a new report in the database with the user ID and opinion.
+
+    console.log('Report created successfully:', newReport);
 
     return res.status(201).json({
+      success: true,
       message: "Report submitted successfully",
-      report: newReport,
-      //Sends a 201 Created response with a success message and the new report.
+      report: newReport
     });
+
   } catch (error) {
-    console.error("Report creation error:", error);
+    console.error("❌ Report creation error:", error);
     return res.status(500).json({
+      success: false,
       message: "Server error",
-      error: error.message,
-      //If anything goes wrong, logs the error and sends a 500 Internal Server Error response.
+      error: error.message
+    });
+  }
+};
+
+/**
+ * Get all reports with user information (for admin)
+ */
+export const getReportsController = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const userRole = req.userRole;
+
+    console.log('Fetching reports - User ID:', userId, 'Role:', userRole);
+
+    // Check if user is admin
+    if (userRole !== 'ADMIN') {
+      return res.status(403).json({ 
+        success: false,
+        message: "Access denied. Admin only." 
+      });
+    }
+
+    // Fetch all reports with user details
+    const reports = await findAllReportsWithUser();
+
+    console.log(`Found ${reports.length} reports`);
+
+    return res.status(200).json({
+      success: true,
+      count: reports.length,
+      reports: reports
+    });
+
+  } catch (error) {
+    console.error("❌ Error fetching reports:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message
+    });
+  }
+};
+
+/**
+ * Get reports for the current user (optional)
+ */
+export const getUserReportsController = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    if (!userId) {
+      return res.status(401).json({ 
+        success: false,
+        message: "User not authenticated" 
+      });
+    }
+
+    // You'll need to implement this function in report.db.js if needed
+    const userReports = await getUserReports(userId);
+
+    return res.status(200).json({
+      success: true,
+      count: userReports.length,
+      reports: userReports
+    });
+
+  } catch (error) {
+    console.error("❌ Error fetching user reports:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error"
     });
   }
 };

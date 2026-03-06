@@ -58,12 +58,20 @@ SELECT @LegsId = id FROM Categories WHERE name = 'Legs';
 SELECT @FeaturedId = id FROM Categories WHERE name = 'Featured';
 
 -- =========================
--- 5. DELETE OLD PRODUCTS (Fresh Start)
+-- 5. DELETE OLD PRODUCTS (সঠিক ক্রমে) - COMMENTED OUT TO PRESERVE ORDER DATA
 -- =========================
-PRINT '🗑️ Deleting old products...';
-DELETE FROM Products WHERE categoryId IN (@ArmsId, @LegsId, @LaptopsId, @DesktopsId, @ElectronicsId, @FeaturedId);
-PRINT '✅ Old products deleted';
+-- PRINT '🗑️ প্রথমে OrderItems মুছছি...';
+-- DELETE FROM OrderItems;
 
+-- PRINT '🗑️ এখন Orders মুছছি...';
+-- DELETE FROM Orders;
+
+-- PRINT '🗑️ এখন CartProducts মুছছি...';
+-- DELETE FROM CartProducts;
+
+-- PRINT '🗑️ এখন Products মুছছি...';
+-- DELETE FROM Products WHERE categoryId IN (@ArmsId, @LegsId, @LaptopsId, @DesktopsId, @ElectronicsId, @FeaturedId);
+-- PRINT '✅ সব products মুছেছে';
 -- =========================
 -- 5.1 ARMS PRODUCTS (15 products)
 -- =========================
@@ -213,4 +221,37 @@ GROUP BY c.name
 ORDER BY c.name;
 
 PRINT '✅ Seed data insertion completed!';
+
+
+-- bank_tran_id কলাম যোগ করুন (যদি না থাকে)
+IF COL_LENGTH('dbo.Orders', 'bank_tran_id') IS NULL
+BEGIN
+    ALTER TABLE dbo.Orders 
+    ADD bank_tran_id NVARCHAR(100);
+    PRINT '✅ bank_tran_id column added to Orders table';
+END
+ELSE
+BEGIN
+    PRINT '✅ bank_tran_id column already exists';
+END
+
+-- val_id কলাম যোগ করুন (যদি না থাকে)
+IF COL_LENGTH('dbo.Orders', 'val_id') IS NULL
+BEGIN
+    ALTER TABLE dbo.Orders 
+    ADD val_id NVARCHAR(100);
+    PRINT '✅ val_id column added to Orders table';
+END
+ELSE
+BEGIN
+    PRINT '✅ val_id column already exists';
+END
+
+-- কলামগুলো দেখুন
+SELECT COLUMN_NAME 
+FROM INFORMATION_SCHEMA.COLUMNS 
+WHERE TABLE_NAME = 'Orders'
+ORDER BY ORDINAL_POSITION;
+
+
 GO

@@ -21,6 +21,7 @@ export async function getCartWithProductDetails(userId) {
                     p.price AS product_price,
                     p.photo AS product_photo,
                     p.details AS product_details,
+                    p.availability AS product_availability,
                     p.categoryId AS product_categoryId
                 FROM CartProducts cp
                 INNER JOIN Products p ON cp.productId = p.id
@@ -115,7 +116,6 @@ export async function deleteCartProductById(cartProductId) {
     try {
         const pool = await connectMssqlDB();
         
-        // First check if the item exists
         const checkResult = await pool.request()
             .input('id', sql.Int, cartProductId)
             .query('SELECT id FROM CartProducts WHERE id = @id');
@@ -125,7 +125,6 @@ export async function deleteCartProductById(cartProductId) {
             return false;
         }
         
-        // Delete the item
         const result = await pool.request()
             .input('id', sql.Int, cartProductId)
             .query('DELETE FROM CartProducts WHERE id = @id');

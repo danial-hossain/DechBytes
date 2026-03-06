@@ -128,6 +128,10 @@ const Profile = () => {
     }
   };
 
+  const handleViewOrders = () => {
+    navigate("/profile/orders");
+  };
+
   if (!userInfo) return <div className="profile-loading">Loading...</div>;
 
   const avatarUrl =
@@ -147,6 +151,7 @@ const Profile = () => {
           <div className="profile-menu">
             <button type="button" className="profile-menu-item active">Personal Information</button>
             <button type="button" className="profile-menu-item" onClick={() => navigate("/profile/edit")}>Login & Password</button>
+            <button type="button" className="profile-menu-item" onClick={handleViewOrders}>My Orders</button>
             <button type="button" className="profile-menu-item" onClick={handleLogout}>Log Out</button>
           </div>
         </aside>
@@ -249,6 +254,25 @@ const Profile = () => {
                 type="text"
                 value={form.postalCode}
                 onChange={(event) => handleChange("postalCode", event.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="profile-grid two-col">
+            <div className="field-wrap">
+              <label>State</label>
+              <input
+                type="text"
+                value={form.state}
+                onChange={(event) => handleChange("state", event.target.value)}
+              />
+            </div>
+            <div className="field-wrap">
+              <label>Country</label>
+              <input
+                type="text"
+                value={form.country}
+                onChange={(event) => handleChange("country", event.target.value)}
               />
             </div>
           </div>

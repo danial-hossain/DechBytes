@@ -47,6 +47,12 @@ const Desktop = () => {
 
     if (!product) return;
 
+    // ✅ Check availability before adding to cart
+    if (product.availability === 0) {
+      alert("❌ This product is currently out of stock");
+      return;
+    }
+
     try {
       const res = await fetch("http://localhost:5001/api/cart/add", {
         method: "POST",
@@ -89,11 +95,17 @@ const Desktop = () => {
         <h2>{product.name}</h2>
         <p className="price">${product.price}</p>
         <p className="details">{product.details}</p>
+        
+        {/* ✅ Show availability status */}
+        <p className={`availability ${product.availability === 0 ? 'out-of-stock' : 'in-stock'}`}>
+          Status: {product.availability === 0 ? 'Out of Stock' : 'In Stock'}
+        </p>
 
         <div className="quantity-section">
           <button 
             className="qty-btn"
             onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
+            disabled={product.availability === 0}
           >
             -
           </button>
@@ -103,17 +115,23 @@ const Desktop = () => {
             value={quantity}
             onChange={(e) => setQuantity(Math.max(1, Number(e.target.value)))}
             className="qty-input"
+            disabled={product.availability === 0}
           />
           <button 
             className="qty-btn"
             onClick={() => setQuantity(prev => prev + 1)}
+            disabled={product.availability === 0}
           >
             +
           </button>
         </div>
 
-        <button className="add-to-cart-btn" onClick={addToCart}>
-          Add to Cart ({quantity} item{quantity > 1 ? 's' : ''})
+        <button 
+          className={`add-to-cart-btn ${product.availability === 0 ? 'disabled' : ''}`}
+          onClick={addToCart}
+          disabled={product.availability === 0}
+        >
+          {product.availability === 0 ? 'Out of Stock' : `Add to Cart (${quantity} item${quantity > 1 ? 's' : ''})`}
         </button>
       </div>
     </div>

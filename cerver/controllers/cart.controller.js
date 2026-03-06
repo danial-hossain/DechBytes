@@ -7,9 +7,10 @@ import {
     getCartItemByUserAndProduct,
     getCartProductById
 } from '../utils/cart.db.js';
+import { getProductById } from '../utils/product.db.js';
 
 // ============================================
-// ADD PRODUCT TO CART
+// ADD PRODUCT TO CART (with availability check)
 // ============================================
 export async function addProductToCart(req, res) {
     try {
@@ -28,6 +29,26 @@ export async function addProductToCart(req, res) {
             return res.status(400).json({
                 success: false,
                 message: "Invalid product ID",
+            });
+        }
+
+        // Check if product exists and is available
+        const product = await getProductById(parsedProductId);
+        
+        if (!product) {
+            return res.status(404).json({
+                success: false,
+                message: "Product not found",
+            });
+        }
+
+        // ✅ Normalize availability to number and check
+        const isAvailable = product.availability === true || product.availability === 1;
+        
+        if (!isAvailable) {
+            return res.status(400).json({
+                success: false,
+                message: "Product is currently out of stock",
             });
         }
 
@@ -65,27 +86,34 @@ export async function addProductToCart(req, res) {
 }
 
 // ============================================
-// GET USER CART
+// GET USER CART (with availability check)
 // ============================================
 export async function getUserCart(req, res) {
     try {
         const userId = req.userId;
         const cartItems = await getCartWithProductDetails(userId);
         
-        // Format for frontend
-        const formattedCart = cartItems.map(item => ({
-            _id: item.cart_id,
-            productId: item.productId,
-            quantity: item.quantity,
-            userId: item.userId,
-            product: {
-                id: item.product_id,
-                name: item.product_name,
-                price: item.product_price,
-                photo: item.product_photo,
-                details: item.product_details
-            }
-        }));
+        // Format for frontend and filter out unavailable products
+        const formattedCart = cartItems
+            .filter(item => {
+                // ✅ Normalize availability check
+                const isAvailable = item.product_availability === true || item.product_availability === 1;
+                return isAvailable;
+            })
+            .map(item => ({
+                _id: item.cart_id,
+                productId: item.productId,
+                quantity: item.quantity,
+                userId: item.userId,
+                product: {
+                    id: item.product_id,
+                    name: item.product_name,
+                    price: item.product_price,
+                    photo: item.product_photo,
+                    details: item.product_details,
+                    availability: item.product_availability === true || item.product_availability === 1 ? 1 : 0
+                }
+            }));
 
         res.json({ success: true, cart: formattedCart });
     } catch (error) {

@@ -1,11 +1,11 @@
 import auth from "../middlewares/auth.js";
-import { findUserById, countUsers, findUsers } from "../utils/user.db.js";
-import { countProducts, createProduct, findProductByIdAndCategoryId, searchProducts } from "../utils/product.db.js"; // Import createProduct, findProductByIdAndCategoryId, searchProducts
+import { findUserById, countUsers, findUsers, updateUserById } from "../utils/user.db.js"; // ✅ updateUserById যোগ করা হয়েছে
+import { countProducts, createProduct, findProductByIdAndCategoryId, searchProducts } from "../utils/product.db.js";
 import { findCategoryByName, findAllCategories } from "../utils/category.db.js";
-import { countOrders, findAllOrders } from "../utils/order.db.js"; // Assume these exist or will be created
-import { countReports, findAllReportsWithUser } from "../utils/report.db.js"; // Assume these exist or will be created, findReportById for populate
-import { countHelps, findAllHelps } from "../utils/help.db.js"; // Assume these exist or will be created
-import { Router } from "express"; // Added import for Router
+import { countOrders, findAllOrders } from "../utils/order.db.js";
+import { countReports, findAllReportsWithUser } from "../utils/report.db.js";
+import { countHelps, findAllHelps } from "../utils/help.db.js";
+import { Router } from "express";
 
 const router = Router();
 
@@ -124,8 +124,6 @@ router.get("/helps", auth, async (req, res) => {
   }
 });
 
-
-
 // ===== LOGOUT =====
 router.post("/logout", auth, async (req, res) => {
   try {
@@ -135,8 +133,10 @@ router.post("/logout", auth, async (req, res) => {
     // ✅ Mark user inactive
     await updateUserById(user.id, { status: "Inactive" });
 
-    // ✅ Clear cookie if using cookie auth
-    res.clearCookie("token"); 
+    // ✅ Clear cookies
+    res.clearCookie("accessToken");
+    res.clearCookie("refreshToken");
+    res.clearCookie("token"); // পুরনো cookie থাকলে
 
     res.json({ message: "Logged out successfully ✅" });
   } catch (err) {

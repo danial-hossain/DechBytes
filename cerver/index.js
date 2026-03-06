@@ -19,6 +19,7 @@ import searchRoutes from './routes/search.route.js';
 import userRoutes from './routes/user.route.js';
 import addressRoutes from './routes/address.route.js';
 import categoryRoutes from './routes/category.route.js';
+import paymentRoutes from './routes/payment.route.js';
 
 dotenv.config();
 
@@ -30,23 +31,66 @@ const ENV_ALLOWED_ORIGINS = (process.env.FRONTEND_URLS || "")
   .split(",")
   .map((origin) => origin.trim())
   .filter(Boolean);
-const ALLOWED_ORIGINS = [...new Set([...DEFAULT_ALLOWED_ORIGINS, ...ENV_ALLOWED_ORIGINS])];
+
+// ✅ SSLCommerz origins যোগ করুন
+const SSLCOMMERZ_ORIGINS = [
+  "https://sandbox.sslcommerz.com",
+  "https://securepay.sslcommerz.com",
+  "https://sandbox.sslcommerz.com.bd",
+  "https://www.sslcommerz.com"
+];
+
+const ALLOWED_ORIGINS = [...new Set([
+  ...DEFAULT_ALLOWED_ORIGINS, 
+  ...ENV_ALLOWED_ORIGINS,
+  ...SSLCOMMERZ_ORIGINS
+])];
 
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// ✅ আপডেটেড CORS কনফিগারেশন
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || ALLOWED_ORIGINS.includes(origin) || DEV_ORIGIN_REGEX.test(origin)) {
+    // Allow requests with no origin (like mobile apps, curl, postman, SSLCommerz)
+    if (!origin) {
       return callback(null, true);
     }
-
+    
+    // Check if origin is in allowed list
+    if (ALLOWED_ORIGINS.includes(origin)) {
+      return callback(null, true);
+    }
+    
+    // Check localhost origins
+    if (DEV_ORIGIN_REGEX.test(origin)) {
+      return callback(null, true);
+    }
+    
+    // ✅ SSLCommerz-এর জন্য বিশেষ অনুমতি
+    if (origin.includes('sslcommerz.com')) {
+      console.log(`✅ CORS allowed for SSLCommerz: ${origin}`);
+      return callback(null, true);
+    }
+    
+    // Allow ngrok URLs (for testing)
+    if (origin.includes('ngrok-free.app') || origin.includes('ngrok.io')) {
+      return callback(null, true);
+    }
+    
+    console.log(`❌ CORS blocked for origin: ${origin}`);
     return callback(new Error(`CORS blocked for origin: ${origin}`));
   },
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
 }));
+
 app.use(cookieParser());
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" } // SSLCommerz-এর জন্য প্রয়োজন
+}));
 app.use(morgan('dev'));
 
 // Connect to MSSQL Database
@@ -69,6 +113,7 @@ app.use('/api/search', searchRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/addresses', addressRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/payment', paymentRoutes);
 
 // ✅ 404 handler - must be AFTER all other routes
 app.use((req, res) => {

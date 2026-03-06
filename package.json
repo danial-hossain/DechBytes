@@ -19,6 +19,7 @@
     "react-icons": "^5.5.0",
     "react-router-dom": "^6.30.1",
     "react-scripts": "^5.0.1",
+    "sslcommerz-nodejs": "^1.0.8",
     "styled-components": "^6.1.19",
     "swiper": "^11.2.10",
     "web-vitals": "^2.1.4"
