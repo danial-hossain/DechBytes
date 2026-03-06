@@ -5,26 +5,21 @@ import {
   loginUserController,
   logoutController,
   registerUserController,
-  verifyEmailController,
 } from "../controllers/user.controller.js";
+import { verifyEmailController, resendOTPController } from "../controllers/verifyEmail.controller.js"; // ✅ নতুন import
 import auth from "../middlewares/auth.js";
-
-/*
-Router → creates a modular Express router.
-Controllers → functions that handle the logic for user routes.
-auth → middleware that protects routes so only logged-in users can access them.login krlo kina setai middlewares>auth.js e
-*/
 
 const userRouter = Router();
 
 // Auth routes
 userRouter.post("/register", registerUserController);
-userRouter.post("/verify-email", verifyEmailController);
+userRouter.post("/verify-email", verifyEmailController);        // ✅ আলাদা controller
+userRouter.post("/resend-otp", resendOTPController);            // ✅ নতুন route
 userRouter.post("/login", loginUserController);
 userRouter.get("/logout", auth, logoutController);
 
 // Profile routes
 userRouter.get("/profile", auth, getProfileController);
-userRouter.put("/profile/update", auth, updateProfileController); // ✅ matches frontend
+userRouter.put("/profile/update", auth, updateProfileController);
 
 export default userRouter;

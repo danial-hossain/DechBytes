@@ -89,24 +89,87 @@ export async function registerUserController(req, res) {
 export async function verifyEmailController(req, res) {
   try {
     const { email, otp } = req.body;
+    
+    console.log('Verifying email:', email, 'with OTP:', otp);
+    
     const user = await findUserByEmail(email);
 
-    if (!user)
-      return res.status(400).json({ error: true, success: false, message: "User not found" });
+    if (!user) {
+      console.log('User not found for email:', email);
+      return res.status(400).json({ 
+        error: true, 
+        success: false, 
+        message: "User not found" 
+      });
+    }
 
-    if (user.otp !== otp)
-      return res.status(400).json({ error: true, success: false, message: "Invalid OTP" });
+    console.log('User found:', { 
+      email: user.email, 
+      dbOtp: user.otp, 
+      dbExpires: user.otp_expires,  // ✅ use otp_expires
+      currentTime: new Date(),
+      expiresTime: user.otp_expires ? new Date(user.otp_expires) : null
+    });
 
-    if (new Date(user.otpExpires).getTime() < Date.now())
-      return res.status(400).json({ error: true, success: false, message: "OTP expired" });
+    // Check if OTP matches
+    if (user.otp !== otp) {
+      console.log('OTP mismatch:', { provided: otp, stored: user.otp });
+      return res.status(400).json({ 
+        error: true, 
+        success: false, 
+        message: "Invalid OTP" 
+      });
+    }
 
-    await updateUserById(user.id, { verify_email: true, otp: null, otpExpires: null });
+    // ✅ Check OTP expiry using otp_expires
+    if (user.otp_expires) {
+      const now = new Date();
+      const expiryDate = new Date(user.otp_expires);
+      
+      console.log('OTP expiry check:', {
+        now: now.toISOString(),
+        expiry: expiryDate.toISOString(),
+        isExpired: now > expiryDate
+      });
 
-    return res.status(200).json({ error: false, success: true, message: "Email verified successfully" });
+      if (now > expiryDate) {
+        return res.status(400).json({ 
+          error: true, 
+          success: false, 
+          message: "OTP expired" 
+        });
+      }
+    } else {
+      // If no expiry set, consider it expired
+      return res.status(400).json({ 
+        error: true, 
+        success: false, 
+        message: "OTP expired" 
+      });
+    }
+
+    // ✅ Update using correct column names
+    await updateUserById(user.id, { 
+      verify_email: true, 
+      otp: null, 
+      otp_expires: null   // ✅ use otp_expires
+    });
+
+    console.log('Email verified successfully for user:', user.email);
+
+    return res.status(200).json({ 
+      error: false, 
+      success: true, 
+      message: "Email verified successfully" 
+    });
 
   } catch (error) {
     console.error("verifyEmailController error:", error);
-    return res.status(500).json({ message: error.message, error: true, success: false });
+    return res.status(500).json({ 
+      message: error.message, 
+      error: true, 
+      success: false 
+    });
   }
 }
 
