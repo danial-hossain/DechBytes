@@ -254,4 +254,30 @@ WHERE TABLE_NAME = 'Orders'
 ORDER BY ORDINAL_POSITION;
 
 
+
+USE dechbytes;
+GO
+
+-- 1. Index drop
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'idx_orders_user')
+    DROP INDEX idx_orders_user ON dbo.Orders;
+
+-- 2. Foreign keys drop
+IF EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK_Orders_Addresses')
+    ALTER TABLE dbo.Orders DROP CONSTRAINT FK_Orders_Addresses;
+
+IF EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK_Orders_Users')
+    ALTER TABLE dbo.Orders DROP CONSTRAINT FK_Orders_Users;
+
+-- 3. Columns drop
+IF COL_LENGTH('dbo.Orders', 'address_id') IS NOT NULL
+    ALTER TABLE dbo.Orders DROP COLUMN address_id;
+
+IF COL_LENGTH('dbo.Orders', 'user_id') IS NOT NULL
+    ALTER TABLE dbo.Orders DROP COLUMN user_id;
+
+PRINT '✅ user_id and address_id columns dropped successfully';
+GO
+
+
 GO
