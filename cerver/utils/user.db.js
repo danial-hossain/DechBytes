@@ -134,3 +134,11 @@ export async function findUsers(selectFields) {
         .query(`SELECT ${selectClause} FROM Users`);
     return result.recordset;
 }
+export async function updateUserAvatar(id, avatarUrl) {
+    const pool = await connectMssqlDB();
+    await pool.request()
+      .input('id', sql.Int, id)
+      .input('avatar', sql.NVarChar(500), avatarUrl)
+      .query('UPDATE Users SET avatar = @avatar, updated_at = GETDATE() WHERE id = @id');
+    return findUserById(id);
+  }
