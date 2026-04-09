@@ -1,27 +1,32 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import "./style.css";
-//hello
+
 const ReportPage = () => {
   const [opinion, setOpinion] = useState("");
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
-  const [userId, setUserId] = useState(null);
-
-  // Get userId from localStorage
-  useEffect(() => {
-    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-    if (userInfo && userInfo.id) setUserId(userInfo.id);
-  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!opinion) return;
+    if (!opinion.trim()) return;
 
     try {
-      const res = await fetch(`http://localhost:5001/api/report`, { // changed port to 5001
+      const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+      const token = userInfo?.accessToken;
+
+      if (!token) {
+        setMessage("You must be logged in to submit a report");
+        setIsError(true);
+        return;
+      }
+
+      const res = await fetch("http://localhost:5001/api/report", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ opinion, userId }),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ opinion }),
       });
 
       const data = await res.json();
@@ -35,7 +40,7 @@ const ReportPage = () => {
         setIsError(true);
       }
     } catch (err) {
-      console.error("Network error:", err);
+      console.error(err);
       setMessage("Failed to connect to server");
       setIsError(true);
     }
@@ -51,13 +56,13 @@ const ReportPage = () => {
           placeholder="Write your opinion..."
           required
         />
-        <button type="submit" disabled={!opinion.trim()}>Submit</button>
+        <button type="submit" disabled={!opinion.trim()}>
+          Submit
+        </button>
       </form>
 
       {message && (
-        <p className={`message ${isError ? "error" : "success"}`}>
-          {message}
-        </p>
+        <p className={`message ${isError ? "error" : "success"}`}>{message}</p>
       )}
     </div>
   );

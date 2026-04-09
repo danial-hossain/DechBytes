@@ -43,14 +43,14 @@ const Home = () => {
           </div>
 
           <div className="featured-products-box">
-            {products.map((p) => (
-              <div key={p._id} className="product-card">
-                <img src={p.photo} alt={p.name} />
-                <h3>{p.name}</h3>
-             
-                <p>{p.details}</p>
-              </div>
-            ))}
+          {products.map((p) => (
+  <div key={p.id} className="product-card">
+    <img src={p.photo} alt={p.name} />
+    <h3>{p.name}</h3>
+    <p className="product-price">৳{p.price}</p>
+    <p>{p.details}</p>
+  </div>
+))}
           </div>
         </div>
       </section>

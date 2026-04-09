@@ -24,6 +24,7 @@ IF COL_LENGTH('dbo.Users', 'status') IS NULL ALTER TABLE dbo.Users ADD status NV
 IF COL_LENGTH('dbo.Users', 'otp') IS NULL ALTER TABLE dbo.Users ADD otp NVARCHAR(10);
 IF COL_LENGTH('dbo.Users', 'otp_expires') IS NULL ALTER TABLE dbo.Users ADD otp_expires DATETIME2;
 IF COL_LENGTH('dbo.Users', 'role') IS NULL ALTER TABLE dbo.Users ADD role NVARCHAR(20) DEFAULT 'USER';
+
 IF COL_LENGTH('dbo.Users', 'created_at') IS NULL ALTER TABLE dbo.Users ADD created_at DATETIME2 DEFAULT GETDATE();
 IF COL_LENGTH('dbo.Users', 'updated_at') IS NULL ALTER TABLE dbo.Users ADD updated_at DATETIME2 DEFAULT GETDATE();
 GO
@@ -36,6 +37,16 @@ GO
 
 -- =========================
 -- 2. CATEGORIES TABLE
+-- CATEGORIES TABLE
+-- =========================
+-- প্রতিটি product-এর category আলাদা tracking করার জন্য আলাদা table তৈরি করা হয়েছে
+-- এতে category নাম এবং creation time রাখা হয়েছে
+-- Product table-এ categoryId foreign key ব্যবহার করে প্রতিটি product কোন category-এর অন্তর্ভুক্ত তা relate করা যায়
+-- আলাদা category table থাকার কারণে:
+-- 1️⃣ একই category multiple products-এ reuse করা যায়
+-- 2️⃣ Data redundancy কমে
+-- 3️⃣ Category management (add, update, delete) সহজ হয়
+
 -- =========================
 IF OBJECT_ID('dbo.Categories', 'U') IS NULL
 BEGIN
@@ -48,6 +59,12 @@ GO
 
 -- =========================
 -- 3. PRODUCTS TABLE
+-- প্রতিটি product-এর আলাদা তথ্য সংরক্ষণ করতে আলাদা table তৈরি করা হয়েছে
+-- এখানে product-এর নাম, দাম, ছবি, বিবরণ, availability, category ইত্যাদি fields রাখা হয়েছে
+-- categoryId foreign key দিয়ে প্রতিটি product কোন category-এর অন্তর্ভুক্ত তা track করা হয়
+-- ON DELETE SET NULL ব্যবহার করা হয়েছে যাতে category delete হলেও product data হারিয়ে না যায়
+-- created_at এবং updated_at fields দিয়ে product creation এবং modification time track করা যায়
+-- এইভাবে product table standalone হলেও অন্যান্য table (যেমন CartProducts, OrderItems) এর সাথে relation সহজে establish করা যায়
 -- =========================
 IF OBJECT_ID('dbo.Products', 'U') IS NULL
 BEGIN
@@ -74,7 +91,13 @@ END
 GO
 
 -- =========================
--- 4. CARTPRODUCTS TABLE (ONLY CART TABLE WE USE)
+-- 4. CARTPRODUCTS TABLE (ONLY CART TABLE WE USE) ,
+-- প্রতিটি row = একটি product in a user’s cart
+-- CartProducts table কে আলাদা "Cart Item" weak entity হিসেবে দেখানো হয়নি
+-- কারণ এখানে কোনো parent Cart table নেই; CartProducts নিজেই logical cart হিসেবে কাজ করছে
+-- এটি standalone table যা user ↔ product many-to-many সম্পর্ক manage করে
+-- প্রতিটি row independent, তবে এক user অনেক product add করতে পারে এবং এক product অনেক user-এর cart-এ থাকতে পারে
+-- তাই এটি efficiently multiple products handle করতে সক্ষম
 -- =========================
 IF OBJECT_ID('dbo.CartProducts', 'U') IS NULL
 BEGIN
@@ -150,6 +173,9 @@ BEGIN
     ADD CONSTRAINT FK_Addresses_Users
     FOREIGN KEY (userId) REFERENCES dbo.Users(id)
     ON DELETE CASCADE;
+    -- প্রতিটি ইউজারের ঠিকানা te ekadhik typer data like jela bibag,city থাকতে পারে। 
+-- তাই addresses সংরক্ষণের জন্য আলাদা Addresses টেবিল তৈরি করা হয়েছে, 
+-- যেন multiple data (array-like information) সহজে manage করা যায়।
 END
 GO
 
@@ -201,6 +227,9 @@ BEGIN
     FOREIGN KEY (userId) REFERENCES dbo.Users(id);
 END
 GO
+--এখানে Orders table এ userId নামে একটি foreign key ব্যবহার করা হয়েছে,
+-- যা Users table এর id কে refer করে। তাই Users হচ্ছে parent table এবং Orders হচ্ছে child table।
+-- এক user অনেক order করতে পারে, তাই এটি one-to-many relationship।
 
 IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK_Orders_Addresses')
 BEGIN
@@ -223,8 +252,17 @@ BEGIN
         product_price DECIMAL(10,2) NOT NULL,
         quantity INT NOT NULL,
         subtotal DECIMAL(10,2) NOT NULL,
+    -- order_id → Orders(id) কে refer করছে (Foreign Key)
+    -- এর মানে প্রতিটি OrderItem অবশ্যই একটি Order এর সাথে যুক্ত থাকবে
+    -- ON DELETE CASCADE দেওয়া আছে:
+    -- কোনো Order delete করলে, সেই Order এর সব OrderItems automatic delete হয়ে যাবে
         FOREIGN KEY (order_id) REFERENCES dbo.Orders(id) ON DELETE CASCADE,
+     -- product_id → Products(id) কে refer করছে
+    -- এর মাধ্যমে বোঝানো হচ্ছে প্রতিটি OrderItem একটি নির্দিষ্ট Product এর সাথে যুক্ত
+    -- সাধারণত real world এ product delete না করে availability/stock change করা হয়
+    -- তাই এখানে ON DELETE CASCADE ব্যবহার করা হয়নি (data integrity বজায় রাখার জন্য)
         FOREIGN KEY (product_id) REFERENCES dbo.Products(id)
+   
     );
     PRINT '✅ OrderItems table created';
 END
@@ -240,7 +278,7 @@ END
 GO
 
 IF COL_LENGTH('dbo.Reports', 'user_id') IS NULL 
-    ALTER TABLE dbo.Reports ADD user_id INT;
+    ALTER TABLE dbo.Reports ADD user_id INT NOT NULL;  -- ✅ NOT NULL added
 
 IF COL_LENGTH('dbo.Reports', 'opinion') IS NULL 
     ALTER TABLE dbo.Reports ADD opinion NVARCHAR(MAX) NOT NULL;
@@ -265,6 +303,9 @@ GO
 -- =========================
 IF OBJECT_ID('dbo.Helps', 'U') IS NULL
 BEGIN
+    -- Helps table তৈরি ব্যবহার করা হয়েছে user support বা feedback নেওয়ার জন্য
+    -- এখানে কোনো foreign key ব্যবহার করা হয়নি
+
     CREATE TABLE dbo.Helps (
         id INT PRIMARY KEY IDENTITY(1,1),
         email NVARCHAR(150) NOT NULL,
@@ -272,12 +313,21 @@ BEGIN
         status NVARCHAR(20) DEFAULT 'pending',
         created_at DATETIME2 DEFAULT GETDATE()
     );
+
     PRINT '✅ Helps table created';
 END
 GO
 
 -- =========================
 -- 10. ADVERTISEMENTS TABLE
+-- এই table-টি ওয়েবসাইট বা অ্যাপে দেখানোর জন্য বিজ্ঞাপন সংরক্ষণ করে
+-- প্রতিটি row = একটি advertisement এর ছবি এবং creation time
+-- এটি standalone table, অন্য table-এর সাথে direct relation নেই
+-- Advantages:
+-- 1️⃣ নতুন বিজ্ঞাপন যোগ, update বা remove করা সহজ হয়
+-- 2️⃣ Advertisement management centralised থাকে
+-- 3️⃣ Frontend-এ slideshow বা banner display করার জন্য ready data থাকে
+-- মূল কাজ: user experience উন্নত করা এবং marketing content manage করা
 -- =========================
 IF OBJECT_ID('dbo.Advertisements', 'U') IS NULL
 BEGIN

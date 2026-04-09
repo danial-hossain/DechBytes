@@ -8,8 +8,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 
-
 // Pages
+import ReportPage from "./Pages/Report";
 import Home from "./Pages/Home";
 import Cart from "./Pages/Cart";
 import Order from "./Pages/Order";
@@ -19,8 +19,8 @@ import Profile from "./Pages/Profile";
 import ProfileInformation from "./Pages/Profile/Information";
 import Dashboard from "./Pages/DASHBOARD";
 import HelpCenter from "./Pages/Help";
-import Verification from './Pages/Verification';
-import SearchPage from './Pages/SearchPage';
+import Verification from "./Pages/Verification";
+import SearchPage from "./Pages/SearchPage";
 import OrderTracking from "./Pages/OrderTracking";
 
 // Order Status Pages
@@ -270,6 +270,16 @@ function App() {
               element={
                 <LayoutWithHeaderFooter>
                   <OrderTracking />
+                </LayoutWithHeaderFooter>
+              }
+            />
+
+            {/* ===== REPORT PAGE (USER PROTECTED) ===== */}
+            <Route
+              path="/report"
+              element={
+                <LayoutWithHeaderFooter>
+                  <ReportPage />
                 </LayoutWithHeaderFooter>
               }
             />

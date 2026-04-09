@@ -1,39 +1,39 @@
-/* Navigation container */
+/* ── Navigation bar ── */
 .navigation-bar {
-  width: 100%;               /* full width */
   display: flex;
-  justify-content: center;   /* center the child (.nav-links) */
-  background: #fff;
-  padding: 6px 0;
-  font-family: 'Roboto', sans-serif;
+  align-items: center;
+  width: 100%;
 }
 
-/* Navigation links */
 .nav-links {
-  display: flex;
-  justify-content: center;   /* center links */
-  width: 100%;               /* take full width */
-}
-
-.nav-links ul {
   list-style: none;
   display: flex;
-  justify-content: center;   /* align items in center */
   align-items: center;
-  gap: 22px;
-  margin: 0 auto;            /* center horizontally */
+  gap: 4px;
+  margin: 0;
   padding: 0;
 }
 
-.nav-links a {
+.nav-links .nav-link {
   text-decoration: none;
   font-size: 13.5px;
   font-weight: 500;
   letter-spacing: 0.2px;
-  color: rgba(0, 0, 0, 0.85);
-  transition: color 0.2s ease-in-out;
+  color: #555;
+  padding: 9px 12px;
+  border-bottom: 2px solid transparent;
+  display: inline-block;
+  transition: color 0.2s, border-color 0.2s, background 0.15s;
+  white-space: nowrap;
+  border-radius: 4px 4px 0 0;
 }
 
-.nav-links a:hover {
-  color: #ff5252;
+.nav-links .nav-link:hover {
+  color: #f85606;
+  background: #fff3ee;
+}
+
+.nav-links .nav-link.active {
+  color: #f85606;
+  border-bottom-color: #f85606;
 }

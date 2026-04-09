@@ -7,16 +7,18 @@ export const AuthProvider = ({ children }) => {
   const [userInfo, setUserInfo] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Fetch profile if logged in
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const { data } = await axios.get("http://localhost:5001/api/user/profile", {
           withCredentials: true,
         });
-        setUserInfo(data);
+
+        const saved = JSON.parse(localStorage.getItem("userInfo") || "{}");
+        setUserInfo({ ...data, accessToken: saved.accessToken });
       } catch (err) {
         setUserInfo(null);
+        localStorage.removeItem("userInfo");
       } finally {
         setLoading(false);
       }
@@ -25,22 +27,24 @@ export const AuthProvider = ({ children }) => {
     fetchProfile();
   }, []);
 
-  const login = (userData) => setUserInfo(userData);
-  const logout = () => setUserInfo(null);
-  
-  // ✅ NEW: Update profile function
+  const login = (userData) => {
+    setUserInfo(userData);
+    localStorage.setItem("userInfo", JSON.stringify(userData));
+  };
+
+  const logout = () => {
+    setUserInfo(null);
+    localStorage.removeItem("userInfo");
+  };
+
   const updateProfile = (updatedData) => {
-    setUserInfo(updatedData);
+    const updated = { ...updatedData, accessToken: userInfo?.accessToken };
+    setUserInfo(updated);
+    localStorage.setItem("userInfo", JSON.stringify(updated));
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      userInfo, 
-      login, 
-      logout, 
-      updateProfile,  // ✅ Add this
-      loading 
-    }}>
+    <AuthContext.Provider value={{ userInfo, login, logout, updateProfile, loading }}>
       {children}
     </AuthContext.Provider>
   );
