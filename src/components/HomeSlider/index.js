@@ -1,31 +1,42 @@
-// Copyright 2024 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import './style.css';
 
-// Images from public folder
-import opinion from './opinion.png';
-import image from './image.jpg';
-import prostheticArm from './prosthetic_arm.jpg';
-
 const HomeSlider = () => {
-  const slides = [opinion, image, prostheticArm];
+  const [banners, setBanners] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBanners = async () => {
+      try {
+        const res = await fetch("http://localhost:5001/api/home/banners");
+        const data = await res.json();
+
+        // Handle both cases: array directly or object with banners array
+        if (Array.isArray(data)) {
+          setBanners(data);
+        } else if (data && Array.isArray(data.banners)) {
+          setBanners(data.banners);
+        } else {
+          console.warn("Unexpected API response:", data);
+          setBanners([]);
+        }
+      } catch (err) {
+        console.error("Failed to fetch banners:", err);
+        setBanners([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBanners();
+  }, []);
+
+  if (loading) return <div className="featured-section">Loading...</div>;
+  if (banners.length === 0) return null;
 
   return (
     <div className="featured-section">
@@ -36,13 +47,16 @@ const HomeSlider = () => {
           autoplay={{ delay: 5000, disableOnInteraction: false }}
           spaceBetween={20}
           slidesPerView={1}
-          loop={true}
+          loop={banners.length > 1}
           className="product-swiper"
         >
-          {slides.map((slide, index) => (
-            <SwiperSlide key={index}>
+          {banners.map((banner) => (
+            <SwiperSlide key={banner.id || banner._id}>
               <div className="product-slide">
-                <img src={slide} alt={`Slide ${index + 1}`} />
+                <img
+                  src={banner.photo_url || banner.imageUrl}
+                  alt={banner.title || `Banner ${banner.id || banner._id}`}
+                />
               </div>
             </SwiperSlide>
           ))}
