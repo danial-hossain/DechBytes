@@ -22,6 +22,31 @@
   margin-bottom: 25px;
 }
 
+.chat-quick-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 18px;
+  font-size: 14px;
+  color: #374151;
+}
+
+.chat-quick-link {
+  display: inline-block;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #10b981;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background 0.2s ease;
+}
+
+.chat-quick-link:hover {
+  background: #059669;
+}
+
 .help-form {
   display: flex;
   flex-direction: column;

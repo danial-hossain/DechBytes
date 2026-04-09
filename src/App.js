@@ -19,6 +19,7 @@ import Profile from "./Pages/Profile";
 import ProfileInformation from "./Pages/Profile/Information";
 import Dashboard from "./Pages/DASHBOARD";
 import HelpCenter from "./Pages/Help";
+import MessagingPage from "./Pages/Messaging";
 import Verification from "./Pages/Verification";
 import SearchPage from "./Pages/SearchPage";
 import OrderTracking from "./Pages/OrderTracking";
@@ -280,6 +281,16 @@ function App() {
               element={
                 <LayoutWithHeaderFooter>
                   <ReportPage />
+                </LayoutWithHeaderFooter>
+              }
+            />
+
+            {/* ===== MESSAGING PAGE (USER PROTECTED) ===== */}
+            <Route
+              path="/messaging"
+              element={
+                <LayoutWithHeaderFooter>
+                  <MessagingPage />
                 </LayoutWithHeaderFooter>
               }
             />

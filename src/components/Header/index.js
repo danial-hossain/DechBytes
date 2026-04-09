@@ -83,6 +83,12 @@ const Header = () => {
               Help Center
             </Link>
             <Link
+              to="/messaging"
+              className={`util-link ${location.pathname === "/messaging" ? "active" : ""}`}
+            >
+              Live Chat
+            </Link>
+            <Link
               to="/order-tracking"
               className={`util-link ${location.pathname === "/order-tracking" ? "active" : ""}`}
             >

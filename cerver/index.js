@@ -20,6 +20,7 @@ import userRoutes from './routes/user.route.js';
 import addressRoutes from './routes/address.route.js';
 import categoryRoutes from './routes/category.route.js';
 import paymentRoutes from './routes/payment.route.js';
+import messageRoutes from './routes/message.route.js';
 
 dotenv.config();
 
@@ -114,6 +115,7 @@ app.use('/api/user', userRoutes);
 app.use('/api/addresses', addressRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/payment', paymentRoutes);
+app.use('/api/messages', messageRoutes);
 
 // ✅ 404 handler - must be AFTER all other routes
 app.use((req, res) => {
