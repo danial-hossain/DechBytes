@@ -1,23 +1,34 @@
-import React from 'react';
-import { Link } from "react-router-dom";
+import React from "react";
+import { Link, useLocation } from "react-router-dom";
 import "./style.css";
 
+const navLinks = [
+  { to: "/desktops",    label: "Desktop" },
+  { to: "/laptops",     label: "Laptop" },
+  { to: "/electronics", label: "Electronics" },
+  { to: "/arms",        label: "Prosthetic Arms" },
+  { to: "/legs",        label: "Prosthetic Legs" },
+];
+
 const Navigation = () => {
+  const location = useLocation();
+
   return (
     <nav className="navigation-bar">
-      <div className="nav-links">
-        <ul>
-        
-          <li><Link to="/desktops">Desktop</Link></li> {/* Desktop page */}
-          <li><Link to="/laptops">Laptop</Link></li>
-          <li><Link to="/electronics">Electronics</Link></li>
-          <li><Link to="/arms">Prosthetic Arms</Link></li>
-          <li><Link to="/legs">Prosthetic Legs</Link></li> {/* Corrected */}
-        </ul>
-      </div>
+      <ul className="nav-links">
+        {navLinks.map(({ to, label }) => (
+          <li key={to}>
+            <Link
+              to={to}
+              className={`nav-link ${location.pathname === to ? "active" : ""}`}
+            >
+              {label}
+            </Link>
+          </li>
+        ))}
+      </ul>
     </nav>
   );
 };
 
 export default Navigation;
-//Beta Testing

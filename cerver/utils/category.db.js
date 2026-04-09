@@ -4,7 +4,7 @@ export async function findCategoryByName(name) {
     const pool = await connectMssqlDB();
     const result = await pool.request()
         .input('name', sql.NVarChar(255), name)
-        .query('SELECT * FROM Categories WHERE name = @name COLLATE Latin1_General_CI_AI'); // Case-insensitive search
+        .query('SELECT * FROM Categories WHERE name = @name COLLATE Latin1_General_CI_AI');
     return result.recordset[0];
 }
 

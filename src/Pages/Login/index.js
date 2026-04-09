@@ -25,11 +25,13 @@ const Login = () => {
     setLoading(true);
     try {
       // Step 1: login and get tokens
-      await axios.post(
+      const loginRes = await axios.post(
         'http://localhost:5001/api/user/login',
         { email, password },
         { withCredentials: true }
       );
+
+      const { accessToken } = loginRes.data.data; // ← token নাও
 
       // Step 2: fetch full profile with role
       const profileRes = await axios.get(
@@ -37,12 +39,12 @@ const Login = () => {
         { withCredentials: true }
       );
 
-      const userData = profileRes.data;
-      login(userData); // store full user info including role
+      // Step 3: token সহ save করো
+      login({ ...profileRes.data, accessToken });
+
       setLoading(false);
 
-      // Step 3: redirect based on role
-      if (userData.role === 'ADMIN') navigate('/dashboard');
+      if (profileRes.data.role === 'ADMIN') navigate('/dashboard');
       else navigate('/profile');
 
     } catch (err) {
@@ -90,7 +92,7 @@ const Login = () => {
         </form>
 
         <p className="login-signup-text">
-          Don’t have an account? <Link to="/signup" className="login-signup-link">Sign Up</Link>
+          Don't have an account? <Link to="/signup" className="login-signup-link">Sign Up</Link>
         </p>
       </div>
     </section>
