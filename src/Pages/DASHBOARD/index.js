@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
+import MessagingPage from "../Messaging";
 import "./style.css";
 
-const Dashboard = () => {
+const Dashboard = ({ initialTab = "home" }) => {
   const { userInfo } = useAuth();
   const navigate = useNavigate();
 
@@ -13,7 +14,7 @@ const Dashboard = () => {
   const [reports, setReports] = useState([]);
   const [helps, setHelps] = useState([]);
   const [orders, setOrders] = useState([]);
-  const [activeTab, setActiveTab] = useState("home");
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [message, setMessage] = useState({ text: "", type: "" });
   const [loading, setLoading] = useState(false);
 
@@ -44,6 +45,10 @@ const Dashboard = () => {
 
     fetchStats();
   }, [userInfo, navigate]);
+
+  useEffect(() => {
+    setActiveTab(initialTab);
+  }, [initialTab]);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -274,6 +279,7 @@ const Dashboard = () => {
         <ul className="sidebar-menu">
           <li className={activeTab === "home" ? "active" : ""} onClick={() => handleTabClick("home")}>Dashboard</li>
           <li className={activeTab === "users" ? "active" : ""} onClick={() => handleTabClick("users")}>Users</li>
+          <li className={activeTab === "messages" ? "active" : ""} onClick={() => handleTabClick("messages")}>Messages</li>
           <li className={activeTab === "products" ? "active" : ""} onClick={() => handleTabClick("products")}>Products</li>
           <li className={activeTab === "addProduct" ? "active" : ""} onClick={() => handleTabClick("addProduct")}>Add Product</li>
           <li className={activeTab === "orders" ? "active" : ""} onClick={() => handleTabClick("orders")}>Orders</li>
@@ -353,6 +359,11 @@ const Dashboard = () => {
               </tbody>
             </table>
           </div>
+        )}
+
+        {/* Messages Tab */}
+        {activeTab === "messages" && !loading && (
+          <MessagingPage mode="admin" embedded />
         )}
 
         {/* Products Tab with Update and Delete */}

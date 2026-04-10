@@ -22,6 +22,31 @@
   margin-bottom: 25px;
 }
 
+.chat-quick-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 18px;
+  font-size: 14px;
+  color: #374151;
+}
+
+.chat-quick-link {
+  display: inline-block;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #ff8347;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background 0.2s ease;
+}
+
+.chat-quick-link:hover {
+  background: #ff7030;
+}
+
 .help-form {
   display: flex;
   flex-direction: column;
@@ -47,11 +72,11 @@
 
 .help-form input:focus,
 .help-form textarea:focus {
-  border-color: #007bff;
+  border-color: #ff8347;
 }
 
 .help-btn {
-  background: #007bff;
+  background: #ff8347;
   color: #fff;
   border: none;
   padding: 12px;
@@ -63,5 +88,5 @@
 }
 
 .help-btn:hover {
-  background: #0056b3;
+  background: #ff7030;
 }

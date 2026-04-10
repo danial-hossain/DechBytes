@@ -15,6 +15,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { buildApiUrl } from '../../config/api';
 import './style.css';
 
 const SignUp = () => {
@@ -39,9 +40,9 @@ const SignUp = () => {
     setLoading(true);
     try {
       const response = await axios.post(
-        'http://localhost:5001/api/user/register',
+        buildApiUrl('/api/user/register'),
         { name, email, mobile, password }, // 👈 include mobile
-        { withCredentials: true, timeout: 5000 }
+        { withCredentials: true, timeout: 20000 }
       );
 
       setLoading(false);
@@ -53,6 +54,8 @@ const SignUp = () => {
       setLoading(false);
       if (err.response) {
         setError(err.response.data.message || `Server Error: ${err.response.status}`);
+      } else if (err.code === 'ECONNABORTED') {
+        setError('Server is taking too long. Please try again in a few seconds.');
       } else if (err.request) {
         setError('No response from server. Please try again later.');
       } else {
