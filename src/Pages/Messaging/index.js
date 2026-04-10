@@ -207,6 +207,47 @@ export default function MessagingPage() {
     }
   };
 
+  const formatMessageTime = (createdAt) => {
+    if (!createdAt) return '';
+    
+    // Parse the ISO format timestamp
+    const date = new Date(createdAt);
+    
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      console.error('Invalid date:', createdAt);
+      return 'Invalid time';
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const messageDate = new Date(date);
+    messageDate.setHours(0, 0, 0, 0);
+    
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    // Check if it's today
+    if (messageDate.getTime() === today.getTime()) {
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+    }
+    // Check if it's yesterday
+    else if (messageDate.getTime() === yesterday.getTime()) {
+      return `Yesterday ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}`;
+    }
+    // Older dates
+    else {
+      return date.toLocaleDateString([], {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+      });
+    }
+  };
+
   const sendMessage = async () => {
     if (!messageInput.trim() || !selectedConversation) return;
 
@@ -372,7 +413,7 @@ export default function MessagingPage() {
                               <p className="message-sender">{msg.sender?.name}</p>
                               <p className="message-text">{msg.message}</p>
                               <p className="message-time">
-                                {new Date(msg.created_at).toLocaleTimeString()}
+                                {formatMessageTime(msg.created_at)}
                               </p>
                             </div>
                           </div>

@@ -16,7 +16,7 @@
 .messaging-background {
   width: 288px;
   height: 288px;
-  background-color: rgba(16, 185, 129, 0.2);
+  background-color: rgba(255, 131, 71, 0.2);
   left: -96px;
   top: 64px;
 }
@@ -24,7 +24,7 @@
 .messaging-background-2 {
   width: 320px;
   height: 320px;
-  background-color: rgba(20, 184, 166, 0.2);
+  background-color: rgba(255, 131, 71, 0.2);
   right: -112px;
   bottom: 40px;
 }
@@ -47,7 +47,7 @@
 .loading-spinner {
   width: 48px;
   height: 48px;
-  color: #10b981;
+  color: #ff8347;
   animation: spin 1s linear infinite;
   margin-bottom: 16px;
 }
@@ -129,7 +129,7 @@
 .title-icon {
   width: 40px;
   height: 40px;
-  color: #10b981;
+  color: #ff8347;
 }
 
 .new-message-btn {
@@ -137,7 +137,7 @@
   align-items: center;
   gap: 8px;
   border-radius: 8px;
-  background-color: #10b981;
+  background-color: #ff8347;
   padding: 8px 16px;
   font-weight: 700;
   color: #ffffff;
@@ -147,7 +147,7 @@
 }
 
 .new-message-btn:hover:not(:disabled) {
-  background-color: #059669;
+  background-color: #ff7030;
 }
 
 .new-message-btn:disabled {
@@ -188,7 +188,7 @@
 /* Conversations Panel */
 .conversations-panel {
   border-radius: 16px;
-  border: 2px solid rgba(16, 185, 129, 0.3);
+  border: 2px solid rgba(255, 131, 71, 0.3);
   background-color: rgba(255, 255, 255, 0.9);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   overflow: hidden;
@@ -197,7 +197,7 @@
 }
 
 .conversations-header {
-  background: linear-gradient(to right, #10b981, #14b8a6);
+  background: linear-gradient(to right, #ff8347, #ffb380);
   padding: 16px;
   color: #ffffff;
   font-weight: 700;
@@ -224,7 +224,7 @@
   margin-top: 8px;
   background: none;
   border: none;
-  color: #10b981;
+  color: #ff8347;
   text-decoration: underline;
   font-weight: 600;
   cursor: pointer;
@@ -232,13 +232,13 @@
 }
 
 .start-conversation-btn:hover {
-  color: #059669;
+  color: #ff7030;
 }
 
 .conversation-item {
   width: 100%;
   padding: 16px;
-  border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+  border-bottom: 1px solid rgba(255, 131, 71, 0.2);
   text-align: left;
   background: none;
   border: none;
@@ -251,12 +251,12 @@
 }
 
 .conversation-item:hover {
-  background-color: rgba(16, 185, 129, 0.1);
+  background-color: rgba(255, 131, 71, 0.1);
 }
 
 .conversation-item.active {
-  background-color: rgba(16, 185, 129, 0.15);
-  border-left-color: #10b981;
+  background-color: rgba(255, 131, 71, 0.15);
+  border-left-color: #ff8347;
 }
 
 .conversation-content {
@@ -291,7 +291,7 @@
 /* Chat Panel */
 .chat-panel {
   border-radius: 16px;
-  border: 2px solid rgba(16, 185, 129, 0.3);
+  border: 2px solid rgba(255, 131, 71, 0.3);
   background-color: rgba(255, 255, 255, 0.9);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   overflow: hidden;
@@ -300,7 +300,7 @@
 }
 
 .chat-header {
-  background: linear-gradient(to right, #10b981, #14b8a6);
+  background: linear-gradient(to right, #ff8347, #ffb380);
   padding: 16px;
   color: #ffffff;
   font-weight: 700;
@@ -386,7 +386,7 @@
 }
 
 .message-bubble.user {
-  background-color: #10b981;
+  background-color: #ff8347;
   color: #ffffff;
   border-bottom-right-radius: 0;
 }
@@ -445,7 +445,7 @@
 
 /* Chat Input */
 .chat-input-container {
-  border-top: 2px solid rgba(16, 185, 129, 0.2);
+  border-top: 2px solid rgba(255, 131, 71, 0.2);
   padding: 16px;
   background-color: #ffffff;
 }
@@ -466,13 +466,13 @@
 }
 
 .chat-input:focus {
-  border-color: #10b981;
-  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1);
+  border-color: #ff8347;
+  box-shadow: 0 0 0 2px rgba(255, 131, 71, 0.1);
 }
 
 .send-btn {
   border-radius: 8px;
-  background-color: #10b981;
+  background-color: #ff8347;
   border: none;
   padding: 8px;
   color: #ffffff;
@@ -484,7 +484,7 @@
 }
 
 .send-btn:hover:not(:disabled) {
-  background-color: #059669;
+  background-color: #ff7030;
 }
 
 .send-btn:disabled {
@@ -517,7 +517,7 @@
 
 .contact-info-card {
   border-radius: 12px;
-  border: 2px solid rgba(16, 185, 129, 0.2);
+  border: 2px solid rgba(255, 131, 71, 0.2);
   background-color: rgba(255, 255, 255, 0.8);
   padding: 16px;
   text-align: center;
@@ -526,7 +526,7 @@
 .contact-icon {
   width: 32px;
   height: 32px;
-  color: #10b981;
+  color: #ff8347;
   margin: 0 auto 8px;
 }
 

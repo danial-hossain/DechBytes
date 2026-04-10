@@ -36,7 +36,7 @@
   display: inline-block;
   padding: 8px 12px;
   border-radius: 8px;
-  background: #10b981;
+  background: #ff8347;
   color: #fff;
   text-decoration: none;
   font-weight: 600;
@@ -44,7 +44,7 @@
 }
 
 .chat-quick-link:hover {
-  background: #059669;
+  background: #ff7030;
 }
 
 .help-form {
@@ -72,11 +72,11 @@
 
 .help-form input:focus,
 .help-form textarea:focus {
-  border-color: #007bff;
+  border-color: #ff8347;
 }
 
 .help-btn {
-  background: #007bff;
+  background: #ff8347;
   color: #fff;
   border: none;
   padding: 12px;
@@ -88,5 +88,5 @@
 }
 
 .help-btn:hover {
-  background: #0056b3;
+  background: #ff7030;
 }
