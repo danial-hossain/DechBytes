@@ -5,6 +5,16 @@
   padding: 40px 16px;
 }
 
+.messaging-page.embedded {
+  min-height: auto;
+  background: transparent;
+  padding: 0;
+}
+
+.messaging-page.embedded .messaging-container {
+  max-width: none;
+}
+
 .messaging-background,
 .messaging-background-2 {
   position: absolute;

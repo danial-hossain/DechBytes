@@ -299,6 +299,7 @@ function App() {
           {/* ===== ADMIN ROUTES ===== */}
           <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/message" element={<Dashboard initialTab="messages" />} />
           </Route>
         </Routes>
       </BrowserRouter>

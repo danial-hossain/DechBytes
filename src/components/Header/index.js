@@ -9,11 +9,15 @@ import "./style.css";
 const Header = () => {
   const location = useLocation();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState(null);
 
   useEffect(() => {
     const userInfo = JSON.parse(localStorage.getItem("userInfo"));
     setIsLoggedIn(!!userInfo);
+    setUserRole(userInfo?.role || null);
   }, [location]);
+
+  const chatPath = userRole === "ADMIN" ? "/message" : "/messaging";
 
   return (
     <header className="header-container">
@@ -83,8 +87,8 @@ const Header = () => {
               Help Center
             </Link>
             <Link
-              to="/messaging"
-              className={`util-link ${location.pathname === "/messaging" ? "active" : ""}`}
+              to={chatPath}
+              className={`util-link ${location.pathname === "/messaging" || location.pathname === "/message" ? "active" : ""}`}
             >
               Live Chat
             </Link>

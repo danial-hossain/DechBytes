@@ -2,6 +2,15 @@ import * as conversationModel from '../models/conversation.model.js';
 import * as messageModel from '../models/message.model.js';
 import * as userModel from '../models/user.model.js';
 
+const resolveIsAdmin = async (userId, tokenRole) => {
+  if (String(tokenRole || '').toUpperCase() === 'ADMIN') {
+    return true;
+  }
+
+  const user = await userModel.findUserById(userId);
+  return String(user?.role || '').toUpperCase() === 'ADMIN';
+};
+
 /**
  * Get all conversations for authenticated user
  * Admins see assigned conversations + unassigned inbox
@@ -10,7 +19,7 @@ import * as userModel from '../models/user.model.js';
 export async function getConversations(req, res) {
   try {
     const userId = Number(req.userId);
-    const isAdmin = String(req.userRole || '').toUpperCase() === 'ADMIN';
+    const isAdmin = await resolveIsAdmin(userId, req.userRole);
 
     let conversations;
 
@@ -76,7 +85,7 @@ export async function getOrCreateConversation(req, res) {
 export async function getMessages(req, res) {
   try {
     const userId = Number(req.userId);
-    const isAdmin = String(req.userRole || '').toUpperCase() === 'ADMIN';
+    const isAdmin = await resolveIsAdmin(userId, req.userRole);
     const { conversationId } = req.params;
 
     // Get conversation
@@ -124,7 +133,7 @@ export async function getMessages(req, res) {
 export async function sendMessage(req, res) {
   try {
     const userId = Number(req.userId);
-    const isAdmin = String(req.userRole || '').toUpperCase() === 'ADMIN';
+    const isAdmin = await resolveIsAdmin(userId, req.userRole);
     const { conversationId } = req.params;
     const { message: messageText } = req.body;
 
@@ -203,7 +212,7 @@ export async function sendMessage(req, res) {
 export async function closeConversation(req, res) {
   try {
     const userId = Number(req.userId);
-    const isAdmin = String(req.userRole || '').toUpperCase() === 'ADMIN';
+    const isAdmin = await resolveIsAdmin(userId, req.userRole);
     const { conversationId } = req.params;
 
     // Only admin can close
