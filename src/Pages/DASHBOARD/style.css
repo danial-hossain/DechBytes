@@ -103,9 +103,16 @@
   background-color: #2980b9;
 }
 
+/* ================= TABLE STYLES ================= */
+.table-responsive {
+  overflow-x: auto;
+  margin-top: 20px;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
+  min-width: 1200px;
 }
 
 table th {
@@ -113,83 +120,147 @@ table th {
   color: white;
   padding: 12px;
   text-align: left;
+  font-weight: 600;
 }
 
 table td {
   padding: 10px 12px;
   border-bottom: 1px solid #ecf0f1;
+  vertical-align: middle;
 }
 
 table tr:hover {
   background: #f8f9fa;
 }
 
-/* Table column width adjustment */
-table th:nth-child(6), table td:nth-child(6) {
-  width: 120px;
+/* ================= DISCOUNT STYLES ================= */
+.strikethrough {
+  text-decoration: line-through;
+  color: #999;
+  font-size: 13px;
 }
 
-table th:nth-child(7), table td:nth-child(7) {
-  width: 100px;
+.discount-price {
+  color: #ef4444;
+  font-weight: bold;
+  font-size: 16px;
 }
 
+.discount-badge-table {
+  display: inline-block;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.no-discount {
+  color: #999;
+  font-size: 12px;
+  font-style: italic;
+  background: #f0f0f0;
+  padding: 4px 10px;
+  border-radius: 20px;
+  display: inline-block;
+}
+
+.text-muted {
+  color: #999;
+}
+
+/* ================= PRODUCT THUMBNAIL ================= */
+.product-thumbnail {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  padding: 3px;
+}
+
+.details-preview {
+  max-width: 200px;
+  font-size: 12px;
+  color: #666;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+/* ================= AVAILABILITY SELECT ================= */
 .availability-select {
-  padding: 5px;
-  border-radius: 4px;
+  padding: 6px 10px;
+  border-radius: 6px;
   border: 1px solid #ddd;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 12px;
+  font-weight: 500;
   width: 100%;
+  transition: all 0.3s;
 }
 
 .availability-select.in-stock {
-  background-color: #d4edda;
-  color: #155724;
-  font-weight: bold;
+  background-color: #d1fae5;
+  color: #065f46;
+  border-color: #a7f3d0;
 }
 
 .availability-select.out-of-stock {
-  background-color: #f8d7da;
-  color: #721c24;
-  font-weight: bold;
+  background-color: #fee2e2;
+  color: #991b1b;
+  border-color: #fecaca;
 }
 
+.availability-select:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52,152,219,0.2);
+}
+
+/* ================= DELETE BUTTON ================= */
 .delete-btn {
-  padding: 5px 10px;
+  padding: 6px 12px;
   background-color: #dc3545;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.3s;
+  font-size: 12px;
+  transition: all 0.3s;
 }
 
 .delete-btn:hover {
   background-color: #c82333;
+  transform: scale(1.02);
 }
 
+/* ================= ADD PRODUCT FORM ================= */
 .add-product-form {
   background: white;
   padding: 30px;
   border-radius: 10px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  max-width: 500px;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .add-product-form h2 {
   margin-top: 0;
   margin-bottom: 20px;
   color: #2c3e50;
+  text-align: center;
 }
 
 .form-group {
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 5px;
+  margin-bottom: 8px;
   font-weight: bold;
   color: #34495e;
 }
@@ -202,12 +273,88 @@ table th:nth-child(7), table td:nth-child(7) {
   border: 1px solid #bdc3c7;
   border-radius: 5px;
   font-size: 14px;
+  transition: border 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52,152,219,0.1);
 }
 
 .form-group textarea {
   resize: vertical;
+  min-height: 100px;
 }
 
+.image-preview {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  margin-top: 10px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.uploading-text {
+  color: #f39c12;
+  margin-top: 8px;
+  font-size: 12px;
+}
+
+/* ================= DISCOUNT FORM ================= */
+.discount-form {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 30px;
+  border: 1px solid #e0e0e0;
+}
+
+.discount-form h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #2c3e50;
+}
+
+.discount-form form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-width: 400px;
+}
+
+.discount-form select,
+.discount-form input {
+  padding: 10px;
+  border: 1px solid #bdc3c7;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.discount-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-weight: bold;
+  color: #34495e;
+}
+
+.discount-percent {
+  color: #10b981;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.discounted-price {
+  color: #ef4444;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+/* ================= BUTTONS ================= */
 button {
   padding: 12px 20px;
   background: #3498db;
@@ -216,11 +363,12 @@ button {
   border-radius: 5px;
   cursor: pointer;
   font-size: 16px;
-  transition: background 0.3s;
+  transition: all 0.3s;
 }
 
-button:hover {
+button:hover:not(:disabled) {
   background: #2980b9;
+  transform: translateY(-1px);
 }
 
 button:disabled {
@@ -228,11 +376,24 @@ button:disabled {
   cursor: not-allowed;
 }
 
+/* ================= MESSAGES ================= */
 .message {
   padding: 12px 20px;
   margin-bottom: 20px;
   border-radius: 5px;
   font-weight: bold;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .message.success {
@@ -247,11 +408,27 @@ button:disabled {
   border: 1px solid #f5c6cb;
 }
 
-.loading {
+.loading, .loading-spinner {
   text-align: center;
   padding: 40px;
   font-size: 18px;
   color: #7f8c8d;
+}
+
+.loading-spinner::before {
+  content: "⏳";
+  display: inline-block;
+  animation: spin 1s linear infinite;
+  margin-right: 10px;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .no-data {
@@ -261,11 +438,13 @@ button:disabled {
   font-style: italic;
 }
 
+/* ================= STATUS BADGES ================= */
 .status-badge {
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: 4px 10px;
+  border-radius: 20px;
   font-size: 12px;
   font-weight: bold;
+  display: inline-block;
 }
 
 .status-badge.completed {
@@ -281,4 +460,76 @@ button:disabled {
 .status-badge.processing {
   background: #cce5ff;
   color: #004085;
+}
+
+.status-badge.cancelled {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 768px) {
+  .dashboard-container {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    width: 100%;
+    padding: 10px;
+  }
+  
+  .sidebar-menu {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  
+  .sidebar-menu li {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+  
+  .dashboard-main {
+    padding: 15px;
+  }
+  
+  .dashboard-cards {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+  }
+  
+  .card-number {
+    font-size: 20px;
+  }
+  
+  .table-container {
+    padding: 10px;
+  }
+  
+  .add-product-form {
+    padding: 20px;
+  }
+}
+
+/* ================= PRINT STYLES ================= */
+@media print {
+  .sidebar,
+  .products-header,
+  .delete-btn,
+  .refresh-btn {
+    display: none;
+  }
+  
+  .dashboard-main {
+    padding: 0;
+  }
+  
+  table {
+    border: 1px solid #ddd;
+  }
+  
+  table th {
+    background: #f0f0f0;
+    color: black;
+  }
 }

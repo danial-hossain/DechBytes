@@ -1,77 +1,65 @@
-.arm-container {
-    padding: 40px;
-    max-width: 1200px;
-    margin: auto;
-  }
-  
-  .arm-title {
-    font-size: 2rem;
-    font-weight: bold;
-    margin-bottom: 20px;
-    text-align: center;
-  }
-  
-  .arm-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 20px;
-  }
-  
-  .arm-card {
-    background: #fff;
-    border-radius: 12px;
-    padding: 20px;
-    text-align: center;
-    box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
-    transition: transform 0.2s ease-in-out;
-  }
-  
-  .arm-card:hover {
-    transform: translateY(-5px);
-  }
-  
-  .arm-image {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-    border-radius: 8px;
-    margin-bottom: 15px;
-  }
-  
-  .arm-name {
-    font-size: 1.2rem;
-    margin: 10px 0;
-  }
-  
-  .arm-price {
-    color: #007bff;
-    font-weight: bold;
-    margin: 5px 0;
-  }
-  
-  .arm-details {
-    font-size: 0.9rem;
-    color: #555;
-    margin-bottom: 15px;
-  }
-  
-  .arm-btn {
-    background: #007bff;
-    color: white;
-    border: none;
-    padding: 10px 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.2s ease;
-  }
-  
-  .arm-btn:hover {
-    background: #0056b3;
-  }
-  
-  .loading {
-    text-align: center;
-    font-size: 1.2rem;
-    padding: 50px;
-  }
-  
+/* ডিসকাউন্ট ব্যাজ */
+.discount-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 30px;
+  font-size: 13px;
+  font-weight: bold;
+  z-index: 10;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+/* প্রাইস সেকশন */
+.price-section {
+  margin: 10px 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.original-price {
+  text-decoration: line-through;
+  color: #9ca3af;
+  font-size: 15px;
+}
+
+.discounted-price {
+  color: #ef4444;
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.regular-price {
+  color: #1e3a8a;
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.saved-amount {
+  background: #d1fae5;
+  color: #065f46;
+  padding: 4px 8px;
+  border-radius: 20px;
+  font-size: 12px;
+  display: inline-block;
+  margin: 5px 0;
+}
+
+.arm-card {
+  position: relative;
+  background: white;
+  border-radius: 16px;
+  padding: 18px;
+  transition: 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.arm-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+}

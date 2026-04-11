@@ -418,6 +418,86 @@ BEGIN
 END
 GO
 
+-- =========================
+-- 13. Discount 
+-- =========================
+
+IF OBJECT_ID('dbo.Discounts', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.Discounts (
+        id INT PRIMARY KEY IDENTITY(1,1),
+        productId INT NOT NULL,
+        discount_percent DECIMAL(5,2) NOT NULL, -- যেমন: 20.00 মানে 20%
+        start_date DATETIME2 DEFAULT GETDATE(),
+        end_date DATETIME2,
+        is_active BIT DEFAULT 1,
+        created_at DATETIME2 DEFAULT GETDATE(),
+        FOREIGN KEY (productId) REFERENCES dbo.Products(id) ON DELETE CASCADE
+    );
+    PRINT '✅ Discounts table created';
+END
+GO
+
+
+-- প্রথমে চেক করুন ডিসকাউন্ট টেবিলে কিছু আছে কিনা
+SELECT * FROM Discounts;
+
+-- যদি খালি থাকে, তাহলে নিচের SQL রান করুন:
+
+-- Arms ক্যাটাগরির প্রোডাক্টে ডিসকাউন্ট যোগ করুন
+INSERT INTO Discounts (productId, discount_percent, end_date, is_active, created_at)
+SELECT 
+    p.id, 
+    20, 
+    DATEADD(DAY, 30, GETDATE()), 
+    1, 
+    GETDATE()
+FROM Products p
+INNER JOIN Categories c ON p.categoryId = c.id
+WHERE c.name = 'Arms'
+AND p.id IN (1, 2, 3, 4, 5);
+
+-- Legs ক্যাটাগরির প্রোডাক্টে ডিসকাউন্ট যোগ করুন
+INSERT INTO Discounts (productId, discount_percent, end_date, is_active, created_at)
+SELECT 
+    p.id, 
+    15, 
+    DATEADD(DAY, 30, GETDATE()), 
+    1, 
+    GETDATE()
+FROM Products p
+INNER JOIN Categories c ON p.categoryId = c.id
+WHERE c.name = 'Legs'
+AND p.id IN (1, 2, 3);
+
+-- Laptops ক্যাটাগরির প্রোডাক্টে ডিসকাউন্ট যোগ করুন
+INSERT INTO Discounts (productId, discount_percent, end_date, is_active, created_at)
+SELECT 
+    p.id, 
+    10, 
+    DATEADD(DAY, 15, GETDATE()), 
+    1, 
+    GETDATE()
+FROM Products p
+INNER JOIN Categories c ON p.categoryId = c.id
+WHERE c.name = 'Laptops'
+AND p.id IN (1, 2);
+
+-- ডিসকাউন্ট সফলভাবে যোগ হয়েছে কিনা চেক করুন
+SELECT 
+    d.id,
+    p.name AS ProductName,
+    p.price AS OriginalPrice,
+    d.discount_percent,
+    ROUND(p.price - (p.price * d.discount_percent / 100), 2) AS DiscountedPrice,
+    d.end_date,
+    d.is_active
+FROM Discounts d
+INNER JOIN Products p ON d.productId = p.id
+WHERE d.is_active = 1;
+
+
+
 -- Add missing columns if they don't exist
 IF COL_LENGTH('dbo.Messages', 'conversation_id') IS NULL 
     ALTER TABLE dbo.Messages ADD conversation_id INT NOT NULL;

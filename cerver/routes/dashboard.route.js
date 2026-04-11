@@ -1,10 +1,12 @@
 import auth from "../middlewares/auth.js";
-import { findUserById, countUsers, findUsers, updateUserById } from "../utils/user.db.js"; // ✅ updateUserById যোগ করা হয়েছে
+import { findUserById, countUsers, findUsers, updateUserById } from "../utils/user.db.js";
 import { countProducts, createProduct, findProductByIdAndCategoryId, searchProducts } from "../utils/product.db.js";
 import { findCategoryByName, findAllCategories } from "../utils/category.db.js";
 import { countOrders, findAllOrders } from "../utils/order.db.js";
 import { countReports, findAllReportsWithUser } from "../utils/report.db.js";
 import { countHelps, findAllHelps } from "../utils/help.db.js";
+import cloudinary, { uploadProduct } from "../config/cloudinary.js";
+import { findAllDiscounts, upsertDiscount, removeDiscount } from "../utils/discount.db.js";
 import { Router } from "express";
 
 const router = Router();
@@ -34,7 +36,8 @@ router.get("/", auth, async (req, res) => {
 router.get("/users", auth, async (req, res) => {
   try {
     const currentUser = await findUserById(req.userId);
-    if (!currentUser || currentUser.role !== "ADMIN") return res.status(403).json({ message: "Access denied" });
+    if (!currentUser || currentUser.role !== "ADMIN")
+      return res.status(403).json({ message: "Access denied" });
 
     const users = await findUsers(["name", "email", "role", "status", "created_at"]);
     res.json({ users });
@@ -48,10 +51,10 @@ router.get("/users", auth, async (req, res) => {
 router.get("/products", auth, async (req, res) => {
   try {
     const currentUser = await findUserById(req.userId);
-    if (!currentUser || currentUser.role !== "ADMIN") return res.status(403).json({ message: "Access denied" });
+    if (!currentUser || currentUser.role !== "ADMIN")
+      return res.status(403).json({ message: "Access denied" });
 
     const products = await searchProducts('');
-
     res.json({ products });
   } catch (err) {
     console.error("Dashboard products error:", err);
@@ -59,24 +62,105 @@ router.get("/products", auth, async (req, res) => {
   }
 });
 
+// ===== UPLOAD IMAGE =====
+router.post("/upload-image", auth, uploadProduct.single("image"), async (req, res) => {
+  try {
+    const currentUser = await findUserById(req.userId);
+    if (!currentUser || currentUser.role !== "ADMIN")
+      return res.status(403).json({ message: "Access denied" });
+
+    if (!req.file)
+      return res.status(400).json({ message: "No file uploaded" });
+
+    const result = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        { folder: "products" },
+        (error, result) => {
+          if (error) {
+            console.error("Cloudinary error:", error);
+            reject(error);
+          } else {
+            resolve(result);
+          }
+        }
+      );
+      stream.end(req.file.buffer);
+    });
+
+    console.log("✅ Cloudinary URL:", result.secure_url);
+    res.json({ url: result.secure_url });
+
+  } catch (err) {
+    console.error("Upload catch error:", err.message);
+    res.status(500).json({ message: "Image upload failed", error: err.message });
+  }
+});
+
 // ===== ADD PRODUCT =====
 router.post("/add-product", auth, async (req, res) => {
   try {
     const currentUser = await findUserById(req.userId);
-    if (!currentUser || currentUser.role !== "ADMIN") return res.status(403).json({ message: "Access denied" });
+    if (!currentUser || currentUser.role !== "ADMIN")
+      return res.status(403).json({ message: "Access denied" });
 
     const { categoryName, name, price, photo, details } = req.body;
+
     if (!categoryName || !name || !price || !photo || !details)
       return res.status(400).json({ message: "All fields are required" });
 
     const category = await findCategoryByName(categoryName);
-    if (!category) return res.status(404).json({ message: "Category not found" });
+    if (!category)
+      return res.status(404).json({ message: "Category not found" });
 
-    await createProduct({ name, price, photo, details, categoryId: category.id });
+    await createProduct({
+      name,
+      price: parseFloat(price),
+      photo,
+      details,
+      categoryId: category.id,
+    });
 
-    res.json({ message: "Product added successfully" });
+    res.json({ success: true, message: "Product added successfully" });
   } catch (err) {
     console.error("Add product error:", err);
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
+// ===== UPDATE PRODUCT =====
+router.put("/update-product/:id", auth, async (req, res) => {
+  try {
+    const currentUser = await findUserById(req.userId);
+    if (!currentUser || currentUser.role !== "ADMIN")
+      return res.status(403).json({ message: "Access denied" });
+
+    const { name, price, photo, details, categoryName } = req.body;
+
+    let categoryId = null;
+    if (categoryName) {
+      const category = await findCategoryByName(categoryName);
+      if (!category)
+        return res.status(404).json({ message: "Category not found" });
+      categoryId = category.id;
+    }
+
+    res.json({ success: true, message: "Product updated successfully" });
+  } catch (err) {
+    console.error("Update product error:", err);
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
+// ===== DELETE PRODUCT =====
+router.delete("/delete-product/:id", auth, async (req, res) => {
+  try {
+    const currentUser = await findUserById(req.userId);
+    if (!currentUser || currentUser.role !== "ADMIN")
+      return res.status(403).json({ message: "Access denied" });
+
+    res.json({ success: true, message: "Product deleted successfully" });
+  } catch (err) {
+    console.error("Delete product error:", err);
     res.status(500).json({ message: "Server error", error: err.message });
   }
 });
@@ -96,11 +180,26 @@ router.get("/orders", auth, async (req, res) => {
   }
 });
 
+// ===== UPDATE ORDER STATUS =====
+router.put("/orders/:id/status", auth, async (req, res) => {
+  try {
+    const currentUser = await findUserById(req.userId);
+    if (!currentUser || currentUser.role !== "ADMIN")
+      return res.status(403).json({ message: "Access denied" });
+
+    res.json({ success: true, message: "Order status updated successfully" });
+  } catch (err) {
+    console.error("Update order error:", err);
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
 // ===== REPORTS =====
 router.get("/reports", auth, async (req, res) => {
   try {
     const currentUser = await findUserById(req.userId);
-    if (!currentUser || currentUser.role !== "ADMIN") return res.status(403).json({ message: "Access denied" });
+    if (!currentUser || currentUser.role !== "ADMIN")
+      return res.status(403).json({ message: "Access denied" });
 
     const reports = await findAllReportsWithUser();
     res.json({ reports });
@@ -114,7 +213,8 @@ router.get("/reports", auth, async (req, res) => {
 router.get("/helps", auth, async (req, res) => {
   try {
     const currentUser = await findUserById(req.userId);
-    if (!currentUser || currentUser.role !== "ADMIN") return res.status(403).json({ message: "Access denied" });
+    if (!currentUser || currentUser.role !== "ADMIN")
+      return res.status(403).json({ message: "Access denied" });
 
     const helps = await findAllHelps();
     res.json({ helps });
@@ -130,17 +230,68 @@ router.post("/logout", auth, async (req, res) => {
     const user = await findUserById(req.userId);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    // ✅ Mark user inactive
     await updateUserById(user.id, { status: "Inactive" });
 
-    // ✅ Clear cookies
     res.clearCookie("accessToken");
     res.clearCookie("refreshToken");
-    res.clearCookie("token"); // পুরনো cookie থাকলে
+    res.clearCookie("token");
 
-    res.json({ message: "Logged out successfully ✅" });
+    res.json({ success: true, message: "Logged out successfully ✅" });
   } catch (err) {
     console.error("Logout error:", err);
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
+// ===== GET ALL DISCOUNTS =====
+router.get("/discounts", auth, async (req, res) => {
+  try {
+    const currentUser = await findUserById(req.userId);
+    if (!currentUser || currentUser.role !== "ADMIN")
+      return res.status(403).json({ message: "Access denied" });
+
+    const discounts = await findAllDiscounts();
+    res.json({ discounts });
+  } catch (err) {
+    console.error("Get discounts error:", err);
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
+// ===== ADD / UPDATE DISCOUNT =====
+router.post("/discounts", auth, async (req, res) => {
+  try {
+    const currentUser = await findUserById(req.userId);
+    if (!currentUser || currentUser.role !== "ADMIN")
+      return res.status(403).json({ message: "Access denied" });
+
+    const { productId, discount_percent, end_date } = req.body;
+
+    if (!productId || !discount_percent)
+      return res.status(400).json({ message: "productId এবং discount_percent দরকার" });
+
+    if (discount_percent < 1 || discount_percent > 99)
+      return res.status(400).json({ message: "Discount 1% থেকে 99% এর মধ্যে হতে হবে" });
+
+    await upsertDiscount({ productId, discount_percent, end_date });
+    res.json({ message: "✅ Discount সফলভাবে সেট হয়েছে!" });
+  } catch (err) {
+    console.error("Add discount error:", err);
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
+// ===== REMOVE DISCOUNT =====
+router.delete("/discounts/:productId", auth, async (req, res) => {
+  try {
+    const currentUser = await findUserById(req.userId);
+    if (!currentUser || currentUser.role !== "ADMIN")
+      return res.status(403).json({ message: "Access denied" });
+
+    await removeDiscount(req.params.productId);
+    res.json({ message: "✅ Discount সরানো হয়েছে!" });
+  } catch (err) {
+    console.error("Remove discount error:", err);
     res.status(500).json({ message: "Server error", error: err.message });
   }
 });
