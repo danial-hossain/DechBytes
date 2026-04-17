@@ -11,8 +11,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@siamf/sslcommerz": "^1.0.5",
     "@tgwf/co2": "^0.17.0",
+    "axios": "^1.15.0",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.9.0",
     "cookie-parser": "^1.4.7",
@@ -26,6 +26,7 @@
     "multer": "^2.1.1",
     "nodemailer": "^8.0.1",
     "sslcommerz-nodejs": "^1.0.8",
+    "streamifier": "^0.1.1",
     "uuid": "^13.0.0"
   }
 }

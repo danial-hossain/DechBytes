@@ -42,8 +42,8 @@ export async function registerUserController(req, res) {
       html: VerificationEmail(name, verifyCode),
     });
 
-    const accessToken = await generatedAccessToken(user.id);
-    const refreshToken = await generatedRefreshToken(user.id);
+    const accessToken = await generatedAccessToken(user.id, user.role);
+    const refreshToken = await generatedRefreshToken(user.id, user.role);
 
     const cookieOptions = { httpOnly: true, secure: false, sameSite: "Lax" };
     res.cookie("accessToken", accessToken, cookieOptions);
@@ -101,8 +101,8 @@ export async function loginUserController(req, res) {
 
     if (user.status === "Suspended") return res.status(400).json({ message: "Account suspended", error: true, success: false });
 
-    const accessToken = await generatedAccessToken(user.id);
-    const refreshToken = await generatedRefreshToken(user.id);
+    const accessToken = await generatedAccessToken(user.id, user.role);
+    const refreshToken = await generatedRefreshToken(user.id, user.role);
 
     await updateUserById(user.id, { last_login_date: new Date(), status: "Active" });
 

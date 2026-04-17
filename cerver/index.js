@@ -6,7 +6,28 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import { connectMssqlDB } from './config/db.js';
 
-// Import routes
+dotenv.config();
+
+const app = express();
+const PORT = process.env.PORT || 5001;
+
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use(cors({
+  origin: true,
+  credentials: true
+}));
+
+app.use(cookieParser());
+app.use(helmet());
+app.use(morgan('dev'));
+
+// DB connect
+connectMssqlDB();
+
+// Routes
 import adminRoutes from './routes/admin.route.js';
 import cartRoutes from './routes/cart.route.js';
 import dashboardRoutes from './routes/dashboard.route.js';
@@ -20,87 +41,18 @@ import userRoutes from './routes/user.route.js';
 import addressRoutes from './routes/address.route.js';
 import categoryRoutes from './routes/category.route.js';
 import paymentRoutes from './routes/payment.route.js';
+import messageRoutes from './routes/message.route.js';
 
-dotenv.config();
+// ⭐ IMPORTANT: ADVERTISEMENT ROUTE (FIXED)
+import advertisementRoutes from './routes/advertisement.route.js';
+import bannerRoutes from "./routes/banner.routes.js";
 
-const app = express();
-const PORT = process.env.PORT || 5001;
-const DEV_ORIGIN_REGEX = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i;
-const DEFAULT_ALLOWED_ORIGINS = ["http://localhost:3000", "http://127.0.0.1:3000","http://192.168.0.230:3000"];
-const ENV_ALLOWED_ORIGINS = (process.env.FRONTEND_URLS || "")
-  .split(",")
-  .map((origin) => origin.trim())
-  .filter(Boolean);
-
-// ✅ SSLCommerz origins যোগ করুন
-const SSLCOMMERZ_ORIGINS = [
-  "https://sandbox.sslcommerz.com",
-  "https://securepay.sslcommerz.com",
-  "https://sandbox.sslcommerz.com.bd",
-  "https://www.sslcommerz.com"
-];
-
-const ALLOWED_ORIGINS = [...new Set([
-  ...DEFAULT_ALLOWED_ORIGINS, 
-  ...ENV_ALLOWED_ORIGINS,
-  ...SSLCOMMERZ_ORIGINS
-])];
-
-// Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// ✅ আপডেটেড CORS কনফিগারেশন
-app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps, curl, postman, SSLCommerz)
-    if (!origin) {
-      return callback(null, true);
-    }
-    
-    // Check if origin is in allowed list
-    if (ALLOWED_ORIGINS.includes(origin)) {
-      return callback(null, true);
-    }
-    
-    // Check localhost origins
-    if (DEV_ORIGIN_REGEX.test(origin)) {
-      return callback(null, true);
-    }
-    
-    // ✅ SSLCommerz-এর জন্য বিশেষ অনুমতি
-    if (origin.includes('sslcommerz.com')) {
-      console.log(`✅ CORS allowed for SSLCommerz: ${origin}`);
-      return callback(null, true);
-    }
-    
-    // Allow ngrok URLs (for testing)
-    if (origin.includes('ngrok-free.app') || origin.includes('ngrok.io')) {
-      return callback(null, true);
-    }
-    
-    console.log(`❌ CORS blocked for origin: ${origin}`);
-    return callback(new Error(`CORS blocked for origin: ${origin}`));
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
-}));
-
-app.use(cookieParser());
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" } // SSLCommerz-এর জন্য প্রয়োজন
-}));
-app.use(morgan('dev'));
-
-// Connect to MSSQL Database
-connectMssqlDB();
 
 app.get('/', (req, res) => {
-  res.send('MSSQL Server is running!');
+  res.send('Server Running');
 });
 
-// Use routes
+// API routes
 app.use('/api/admin', adminRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/dashboard', dashboardRoutes);
@@ -114,22 +66,17 @@ app.use('/api/user', userRoutes);
 app.use('/api/addresses', addressRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/payment', paymentRoutes);
+app.use('/api/messages', messageRoutes);
 
-// ✅ 404 handler - must be AFTER all other routes
+// ⭐ ADS API
+app.use('/api/advertisements', advertisementRoutes);
+app.use("/api/banners", bannerRoutes);
+
+// 404
 app.use((req, res) => {
-  res.status(404).json({ 
-    message: 'Route not found', 
-    error: true, 
-    success: false,
-    path: req.originalUrl
-  });
+  res.status(404).json({ message: 'Route not found' });
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 MSSQL Server running on port ${PORT}`);
-  console.log(`📍 Available routes:`);
-  console.log(`   - http://localhost:${PORT}/`);
-  console.log(`   - http://localhost:${PORT}/api/categories`);
-  console.log(`   - http://localhost:${PORT}/api/products`);
-  console.log(`   - http://localhost:${PORT}/api/user`);
+  console.log(`Server running on port ${PORT}`);
 });

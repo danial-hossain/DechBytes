@@ -356,5 +356,193 @@ IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'idx_cart_user')
     CREATE INDEX idx_cart_user ON CartProducts(userId);
 GO
 
-PRINT '✅ Database schema setup complete!';
+-- =========================
+-- 11. CONVERSATIONS TABLE (CHAT)
+-- =========================
+IF OBJECT_ID('dbo.Conversations', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.Conversations (
+        id INT PRIMARY KEY IDENTITY(1,1),
+        user_id INT NOT NULL,
+        admin_id INT,
+        subject NVARCHAR(255) NOT NULL DEFAULT 'Support Request',
+        status NVARCHAR(20) DEFAULT 'active',
+        created_at DATETIME2 DEFAULT GETDATE(),
+        updated_at DATETIME2 DEFAULT GETDATE(),
+        FOREIGN KEY (user_id) REFERENCES dbo.Users(id) ON DELETE CASCADE,
+        FOREIGN KEY (admin_id) REFERENCES dbo.Users(id)
+    );
+    PRINT '✅ Conversations table created';
+END
+GO
+
+-- Add missing columns if they don't exist
+IF COL_LENGTH('dbo.Conversations', 'user_id') IS NULL 
+    ALTER TABLE dbo.Conversations ADD user_id INT NOT NULL;
+
+IF COL_LENGTH('dbo.Conversations', 'admin_id') IS NULL 
+    ALTER TABLE dbo.Conversations ADD admin_id INT;
+
+IF COL_LENGTH('dbo.Conversations', 'subject') IS NULL 
+    ALTER TABLE dbo.Conversations ADD subject NVARCHAR(255) NOT NULL DEFAULT 'Support Request';
+
+IF COL_LENGTH('dbo.Conversations', 'status') IS NULL 
+    ALTER TABLE dbo.Conversations ADD status NVARCHAR(20) DEFAULT 'active';
+
+IF COL_LENGTH('dbo.Conversations', 'created_at') IS NULL 
+    ALTER TABLE dbo.Conversations ADD created_at DATETIME2 DEFAULT GETDATE();
+
+IF COL_LENGTH('dbo.Conversations', 'updated_at') IS NULL 
+    ALTER TABLE dbo.Conversations ADD updated_at DATETIME2 DEFAULT GETDATE();
+GO
+
+-- =========================
+-- 12. MESSAGES TABLE (CHAT)
+-- =========================
+IF OBJECT_ID('dbo.Messages', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.Messages (
+        id INT PRIMARY KEY IDENTITY(1,1),
+        conversation_id INT NOT NULL,
+        sender_id INT NOT NULL,
+        message NVARCHAR(MAX) NOT NULL,
+        sender_type NVARCHAR(20) DEFAULT 'user',
+        is_read BIT DEFAULT 0,
+        read_at DATETIME2,
+        created_at DATETIME2 DEFAULT GETDATE(),
+        updated_at DATETIME2 DEFAULT GETDATE(),
+        FOREIGN KEY (conversation_id) REFERENCES dbo.Conversations(id) ON DELETE CASCADE,
+        FOREIGN KEY (sender_id) REFERENCES dbo.Users(id)
+    );
+    PRINT '✅ Messages table created';
+END
+GO
+
+-- =========================
+-- 13. Discount 
+-- =========================
+
+IF OBJECT_ID('dbo.Discounts', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.Discounts (
+        id INT PRIMARY KEY IDENTITY(1,1),
+        productId INT NOT NULL,
+        discount_percent DECIMAL(5,2) NOT NULL, -- যেমন: 20.00 মানে 20%
+        start_date DATETIME2 DEFAULT GETDATE(),
+        end_date DATETIME2,
+        is_active BIT DEFAULT 1,
+        created_at DATETIME2 DEFAULT GETDATE(),
+        FOREIGN KEY (productId) REFERENCES dbo.Products(id) ON DELETE CASCADE
+    );
+    PRINT '✅ Discounts table created';
+END
+GO
+
+
+-- প্রথমে চেক করুন ডিসকাউন্ট টেবিলে কিছু আছে কিনা
+SELECT * FROM Discounts;
+
+-- যদি খালি থাকে, তাহলে নিচের SQL রান করুন:
+
+-- Arms ক্যাটাগরির প্রোডাক্টে ডিসকাউন্ট যোগ করুন
+INSERT INTO Discounts (productId, discount_percent, end_date, is_active, created_at)
+SELECT 
+    p.id, 
+    20, 
+    DATEADD(DAY, 30, GETDATE()), 
+    1, 
+    GETDATE()
+FROM Products p
+INNER JOIN Categories c ON p.categoryId = c.id
+WHERE c.name = 'Arms'
+AND p.id IN (1, 2, 3, 4, 5);
+
+-- Legs ক্যাটাগরির প্রোডাক্টে ডিসকাউন্ট যোগ করুন
+INSERT INTO Discounts (productId, discount_percent, end_date, is_active, created_at)
+SELECT 
+    p.id, 
+    15, 
+    DATEADD(DAY, 30, GETDATE()), 
+    1, 
+    GETDATE()
+FROM Products p
+INNER JOIN Categories c ON p.categoryId = c.id
+WHERE c.name = 'Legs'
+AND p.id IN (1, 2, 3);
+
+-- Laptops ক্যাটাগরির প্রোডাক্টে ডিসকাউন্ট যোগ করুন
+INSERT INTO Discounts (productId, discount_percent, end_date, is_active, created_at)
+SELECT 
+    p.id, 
+    10, 
+    DATEADD(DAY, 15, GETDATE()), 
+    1, 
+    GETDATE()
+FROM Products p
+INNER JOIN Categories c ON p.categoryId = c.id
+WHERE c.name = 'Laptops'
+AND p.id IN (1, 2);
+
+-- ডিসকাউন্ট সফলভাবে যোগ হয়েছে কিনা চেক করুন
+SELECT 
+    d.id,
+    p.name AS ProductName,
+    p.price AS OriginalPrice,
+    d.discount_percent,
+    ROUND(p.price - (p.price * d.discount_percent / 100), 2) AS DiscountedPrice,
+    d.end_date,
+    d.is_active
+FROM Discounts d
+INNER JOIN Products p ON d.productId = p.id
+WHERE d.is_active = 1;
+
+
+
+-- Add missing columns if they don't exist
+IF COL_LENGTH('dbo.Messages', 'conversation_id') IS NULL 
+    ALTER TABLE dbo.Messages ADD conversation_id INT NOT NULL;
+
+IF COL_LENGTH('dbo.Messages', 'sender_id') IS NULL 
+    ALTER TABLE dbo.Messages ADD sender_id INT NOT NULL;
+
+IF COL_LENGTH('dbo.Messages', 'message') IS NULL 
+    ALTER TABLE dbo.Messages ADD message NVARCHAR(MAX) NOT NULL;
+
+IF COL_LENGTH('dbo.Messages', 'sender_type') IS NULL 
+    ALTER TABLE dbo.Messages ADD sender_type NVARCHAR(20) DEFAULT 'user';
+
+IF COL_LENGTH('dbo.Messages', 'is_read') IS NULL 
+    ALTER TABLE dbo.Messages ADD is_read BIT DEFAULT 0;
+
+IF COL_LENGTH('dbo.Messages', 'read_at') IS NULL 
+    ALTER TABLE dbo.Messages ADD read_at DATETIME2;
+
+IF COL_LENGTH('dbo.Messages', 'created_at') IS NULL 
+    ALTER TABLE dbo.Messages ADD created_at DATETIME2 DEFAULT GETDATE();
+
+IF COL_LENGTH('dbo.Messages', 'updated_at') IS NULL 
+    ALTER TABLE dbo.Messages ADD updated_at DATETIME2 DEFAULT GETDATE();
+GO
+
+-- Add indexes for chat tables
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'idx_conversations_user')
+    CREATE INDEX idx_conversations_user ON Conversations(user_id);
+
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'idx_conversations_admin')
+    CREATE INDEX idx_conversations_admin ON Conversations(admin_id);
+
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'idx_conversations_status')
+    CREATE INDEX idx_conversations_status ON Conversations(status);
+
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'idx_messages_conversation')
+    CREATE INDEX idx_messages_conversation ON Messages(conversation_id);
+
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'idx_messages_sender')
+    CREATE INDEX idx_messages_sender ON Messages(sender_id);
+
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'idx_messages_read')
+    CREATE INDEX idx_messages_read ON Messages(is_read);
+GO
+
+PRINT '✅ Database schema setup complete with Chat tables!';
 GO

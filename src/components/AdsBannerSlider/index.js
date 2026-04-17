@@ -1,3 +1,4 @@
+// src/components/AdsBannerSlider.js
 import React, { useEffect, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
@@ -13,10 +14,15 @@ const AdsBannerSlider = ({ items }) => {
   useEffect(() => {
     const fetchAds = async () => {
       try {
-        const res = await fetch("http://localhost:5001/api/home/advertisements");
+        // ✅ শুধু এই লাইনটা পরিবর্তন করুন (পূর্বে ছিল /api/home/advertisements)
+        const res = await fetch("http://localhost:5001/api/advertisements", {
+          credentials: "include"
+        });
         const data = await res.json();
 
-        // Fix: check if data.ads exists and is an array
+        console.log("Ads API response:", data); // ডিবাগ করার জন্য
+
+        // Fix: check if data is array
         if (Array.isArray(data)) {
           setAds(data);
         } else if (data && Array.isArray(data.ads)) {
@@ -36,13 +42,13 @@ const AdsBannerSlider = ({ items }) => {
     fetchAds();
   }, []);
 
-  if (loading) return <div className="ads-banner-slider">Loading...</div>;
+  if (loading) return <div className="ads-banner-slider">Loading ads...</div>;
   if (ads.length === 0) return null;
 
   return (
     <div className="ads-banner-slider">
       <Swiper
-        slidesPerView={items}
+        slidesPerView={items || 4}
         spaceBetween={10}
         navigation={true}
         loop={ads.length > 1}
@@ -52,6 +58,12 @@ const AdsBannerSlider = ({ items }) => {
         }}
         modules={[Navigation, Autoplay]}
         className="ads-swiper"
+        breakpoints={{
+          320: { slidesPerView: 1 },
+          640: { slidesPerView: 2 },
+          768: { slidesPerView: 3 },
+          1024: { slidesPerView: items || 4 },
+        }}
       >
         {ads.map((ad) => (
           <SwiperSlide key={ad.id || ad._id}>

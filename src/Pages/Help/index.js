@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import "./style.css";
 
 const HelpCenter = () => {
@@ -42,6 +43,13 @@ const HelpCenter = () => {
     <main className="help-center container">
       <h2 className="help-title">Help Center</h2>
       <p className="help-subtitle">We’re here to help! Please send us your query.</p>
+
+      <div className="chat-quick-action">
+        <span>Need faster support?</span>
+        <Link to="/messaging" className="chat-quick-link">
+          Open Live Chat
+        </Link>
+      </div>
 
       <form className="help-form" onSubmit={handleSubmit}>
         <label>Email Address</label>

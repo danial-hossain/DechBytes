@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../../hooks/useAuth';
 import './style.css';
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const from = location.state?.from;
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -44,8 +46,13 @@ const Login = () => {
 
       setLoading(false);
 
-      if (profileRes.data.role === 'ADMIN') navigate('/dashboard');
-      else navigate('/profile');
+      if (from) {
+        navigate(from, { replace: true });
+      } else if (profileRes.data.role === 'ADMIN') {
+        navigate('/dashboard');
+      } else {
+        navigate('/profile');
+      }
 
     } catch (err) {
       setLoading(false);
