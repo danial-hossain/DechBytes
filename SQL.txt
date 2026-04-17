@@ -34,3 +34,117 @@ WHERE id = 20;
 
 --.\ngrok http 5001
 
+select * from dbo.Users;
+DELETE FROM Reports;
+Delete from Users;
+select * from dbo.CartProducts;
+select * from dbo.Addresses;
+select * from dbo.Advertisements;
+select * from dbo.Banners;
+Delete from Addresses;
+
+select * from dbo.Products;
+select * from dbo.OrderItems;
+select * from dbo.Orders;
+SELECT id, name FROM Products ORDER BY id;
+select * from dbo.Helps;
+select * from dbo.Reports
+select * from dbo.Discounts;
+DELETE FROM OrderItems;
+SELECT id, title, is_active FROM Banners;
+
+PRINT '🗑️ Orders মুছছি...';
+DELETE FROM Orders;
+
+PRINT '🗑️ CartProducts মুছছি...';
+DELETE FROM CartProducts;
+
+PRINT '🗑️ Products মুছছি...';
+DELETE FROM Products;
+-- SQL এ রান করুন
+SELECT id, name, availability FROM Products;
+
+
+
+UPDATE Users 
+SET role = 'ADMIN',
+    updated_at = GETDATE()
+WHERE id = 20;
+
+
+
+-- Banners টেবিলের সব কলাম দেখুন
+SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE, COLUMN_DEFAULT
+FROM INFORMATION_SCHEMA.COLUMNS 
+WHERE TABLE_NAME = 'Banners'
+ORDER BY ORDINAL_POSITION;
+
+--.\ngrok http 5001
+
+-- display_order কলাম যোগ করুন (ইতিমধ্যে যোগ হয়ে থাকলে error দেবে, সেটা নরমাল)
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Banners' AND COLUMN_NAME = 'display_order')
+BEGIN
+    ALTER TABLE Banners ADD display_order INT DEFAULT 0;
+    PRINT '✅ display_order column added';
+END
+ELSE
+BEGIN
+    PRINT '✅ display_order column already exists';
+END
+GO
+
+-- existing banners এর জন্য display_order আপডেট করুন
+UPDATE Banners SET display_order = id WHERE display_order IS NULL OR display_order = 0;
+GO
+
+-- এখন টেবিলের স্ট্রাকচার চেক করুন
+SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE, COLUMN_DEFAULT
+FROM INFORMATION_SCHEMA.COLUMNS 
+WHERE TABLE_NAME = 'Banners'
+ORDER BY ORDINAL_POSITION;
+GO
+
+-- সব ডাটা দেখুন (সঠিক সিনট্যাক্স সহ)
+SELECT id, title, photo_url, is_active, display_order, created_at 
+FROM Banners 
+ORDER BY display_order ASC, id DESC;
+GO
+
+SELECT * FROM Banners;
+
+
+-- Reports টেবিলে নতুন কলাম যোগ করুন
+IF COL_LENGTH('dbo.Reports', 'status') IS NULL
+    ALTER TABLE Reports ADD status NVARCHAR(20) DEFAULT 'pending';
+
+IF COL_LENGTH('dbo.Reports', 'admin_reply') IS NULL
+    ALTER TABLE Reports ADD admin_reply NVARCHAR(MAX);
+
+IF COL_LENGTH('dbo.Reports', 'replied_at') IS NULL
+    ALTER TABLE Reports ADD replied_at DATETIME2;
+
+-- Check columns
+SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Reports';
+-- Helps টেবিলে নতুন কলাম যোগ করুন
+IF COL_LENGTH('dbo.Helps', 'status') IS NULL
+    ALTER TABLE Helps ADD status NVARCHAR(20) DEFAULT 'pending';
+
+IF COL_LENGTH('dbo.Helps', 'admin_reply') IS NULL
+    ALTER TABLE Helps ADD admin_reply NVARCHAR(MAX);
+
+IF COL_LENGTH('dbo.Helps', 'replied_at') IS NULL
+    ALTER TABLE Helps ADD replied_at DATETIME2;
+
+-- Check columns
+SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Helps';
+
+
+-- Reports টেবিলের কলাম দেখুন
+SELECT COLUMN_NAME, DATA_TYPE 
+FROM INFORMATION_SCHEMA.COLUMNS 
+WHERE TABLE_NAME = 'Reports';
+
+-- Helps টেবিলের কলাম দেখুন
+SELECT COLUMN_NAME, DATA_TYPE 
+FROM INFORMATION_SCHEMA.COLUMNS 
+WHERE TABLE_NAME = 'Helps';

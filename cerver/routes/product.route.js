@@ -68,9 +68,8 @@ router.get("/", async (req, res) => {
   }
 });
 
-
 /* =========================
-   GET PRODUCT BY ID (FIXED)
+   GET PRODUCT BY ID
 ========================= */
 router.get("/:id", async (req, res) => {
   try {
@@ -140,6 +139,52 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+/* =========================
+   ✅ UPDATE PRODUCT AVAILABILITY (NEW ROUTE)
+========================= */
+router.put("/:id/availability", auth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { availability } = req.body;
+
+    // Check if user is admin
+    const user = await findUserById(req.userId);
+    if (!user || user.role !== "ADMIN") {
+      return res.status(403).json({ 
+        success: false, 
+        message: "Access denied. Admin only." 
+      });
+    }
+
+    if (availability === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: "Availability value is required"
+      });
+    }
+
+    // Update product availability
+    const updated = await updateProductAvailability(id, availability);
+
+    if (!updated) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found"
+      });
+    }
+
+    res.json({ 
+      success: true, 
+      message: "Product availability updated successfully" 
+    });
+  } catch (err) {
+    console.error("Error updating product availability:", err);
+    res.status(500).json({ 
+      success: false, 
+      error: err.message 
+    });
+  }
+});
 
 /* =========================
    DELETE PRODUCT
