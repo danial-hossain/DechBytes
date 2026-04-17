@@ -203,3 +203,146 @@
     flex-wrap: wrap;
   }
 }
+/* ProductListing.css এ যোগ করুন */
+
+.product-card {
+  position: relative;
+  background: white;
+  border-radius: 12px;
+  padding: 15px;
+  transition: transform 0.3s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+/* Discount Badge */
+.product-discount-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  z-index: 10;
+}
+
+/* Price Section */
+.product-price-section {
+  margin: 10px 0;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.product-discounted-price {
+  color: #e11d48;
+  font-weight: bold;
+  font-size: 20px;
+}
+
+.product-original-price {
+  text-decoration: line-through;
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+.product-regular-price {
+  color: #1e3a8a;
+  font-weight: bold;
+  font-size: 20px;
+}
+
+.product-saved-amount {
+  background: #d1fae5;
+  color: #065f46;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  display: inline-block;
+  margin: 5px 0;
+}
+
+.product-availability {
+  font-size: 12px;
+  color: #666;
+  margin: 5px 0;
+}
+/* Product Listing Discount Styles */
+.product-card {
+  position: relative;
+  background: white;
+  border-radius: 12px;
+  padding: 15px;
+  transition: transform 0.3s, box-shadow 0.3s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.product-discount-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  z-index: 10;
+}
+
+.product-price-section {
+  margin: 10px 0;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.product-discounted-price {
+  color: #e11d48;
+  font-weight: bold;
+  font-size: 20px;
+}
+
+.product-original-price {
+  text-decoration: line-through;
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+.product-regular-price {
+  color: #1e3a8a;
+  font-weight: bold;
+  font-size: 20px;
+}
+
+.product-saved-amount {
+  background: #d1fae5;
+  color: #065f46;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  display: inline-block;
+  margin: 5px 0;
+}
+
+.product-availability {
+  font-size: 12px;
+  color: #666;
+  margin: 5px 0;
+}

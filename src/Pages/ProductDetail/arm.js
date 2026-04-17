@@ -1,3 +1,4 @@
+// src/Pages/ProductDetail/arm.js
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
@@ -24,10 +25,15 @@ const Arm = () => {
           throw new Error(data.message || "Product not found");
         }
   
-        // ✅ Normalize availability to number
+        // ✅ Normalize product data with discount
         const productData = {
           ...data.data,
-          availability: data.data.availability === true || data.data.availability === 1 ? 1 : 0
+          availability: data.data.availability === true || data.data.availability === 1 ? 1 : 0,
+          original_price: data.data.original_price || data.data.price,
+          has_discount: data.data.has_discount === true || data.data.has_discount === 1,
+          discount_percent: data.data.discount_percent || 0,
+          discounted_price: data.data.discounted_price || data.data.price,
+          discount_end_date: data.data.discount_end_date
         };
         
         console.log("Product data from API:", productData);
@@ -54,7 +60,6 @@ const Arm = () => {
 
     if (!product) return;
 
-    // ✅ Check availability before adding to cart
     if (product.availability === 0) {
       alert("❌ This product is currently out of stock");
       return;
@@ -83,13 +88,36 @@ const Arm = () => {
     }
   };
 
+  const formatDiscountEndDate = (endDate) => {
+    if (!endDate) return null;
+    const end = new Date(endDate);
+    const today = new Date();
+    const daysLeft = Math.ceil((end - today) / (1000 * 60 * 60 * 24));
+    
+    if (daysLeft < 0) return "❌ Expired";
+    if (daysLeft === 0) return "🔥 Last day!";
+    if (daysLeft === 1) return "⏰ Ends tomorrow!";
+    if (daysLeft <= 7) return `⚠️ Ends in ${daysLeft} days`;
+    return `📅 Valid until ${end.toLocaleDateString()}`;
+  };
+
   if (loading) return <p className="loading">Loading product...</p>;
   if (error) return <p className="error">{error}</p>;
   if (!product) return <p>Product not found!</p>;
 
+  const hasDiscount = product.has_discount;
+  const originalPrice = parseFloat(product.original_price).toFixed(2);
+  const finalPrice = hasDiscount ? parseFloat(product.discounted_price).toFixed(2) : parseFloat(product.price).toFixed(2);
+  const discountPercent = product.discount_percent || 0;
+  const savedAmount = (originalPrice - finalPrice).toFixed(2);
+  const endDateMsg = formatDiscountEndDate(product.discount_end_date);
+
   return (
     <div className="product-detail-container">
       <div className="product-image">
+        {hasDiscount && (
+          <div className="detail-discount-badge">-{discountPercent}% OFF</div>
+        )}
         <img 
           src={product.photo} 
           alt={product.name}
@@ -100,10 +128,31 @@ const Arm = () => {
       </div>
       <div className="product-info">
         <h2>{product.name}</h2>
-        <p className="price">${product.price}</p>
+        
+        {/* ✅ Price Section with Discount */}
+        <div className="price-section-detail">
+          {hasDiscount ? (
+            <>
+              <span className="original-price-detail">${originalPrice}</span>
+              <span className="discounted-price-detail">${finalPrice}</span>
+            </>
+          ) : (
+            <span className="regular-price-detail">${finalPrice}</span>
+          )}
+        </div>
+
+        {/* ✅ Discount Info */}
+        {hasDiscount && (
+          <>
+            <p className="saved-amount-detail">💰 Save: ${savedAmount}</p>
+            {endDateMsg && (
+              <p className="discount-end-date-detail">{endDateMsg}</p>
+            )}
+          </>
+        )}
+
         <p className="details">{product.details}</p>
         
-        {/* ✅ Show availability status */}
         <p className={`availability ${product.availability === 0 ? 'out-of-stock' : 'in-stock'}`}>
           Status: {product.availability === 0 ? 'Out of Stock' : 'In Stock'}
         </p>

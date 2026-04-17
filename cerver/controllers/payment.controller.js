@@ -1,12 +1,9 @@
-// cerver/controllers/paymentController.js
+
 import { sslcz, BASE_URL, FRONTEND_URL } from '../config/sslcommerz.js';
 import { sql, connectMssqlDB } from '../config/db.js';
 import { v4 as uuidv4 } from 'uuid';
 
-/**
- * পেমেন্ট ইনিশিয়েট করা
- * POST /api/payment/initiate
- */
+
 export async function initiatePayment(req, res) {
     try {
         const userId = req.userId;

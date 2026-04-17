@@ -1,4 +1,4 @@
-// cerver/utils/product.db.js
+// backend/utils/product.db.js
 import { sql, connectMssqlDB } from '../config/db.js';
 
 export async function findProductsByCategoryId(categoryId) {
@@ -9,7 +9,7 @@ export async function findProductsByCategoryId(categoryId) {
             SELECT 
                 p.id,
                 p.name,
-                p.price as original_price,
+                p.price,
                 p.photo,
                 p.details,
                 p.availability,
@@ -19,18 +19,18 @@ export async function findProductsByCategoryId(categoryId) {
                 d.discount_percent,
                 d.end_date,
                 CASE 
-                    WHEN d.id IS NOT NULL AND (d.end_date IS NULL OR d.end_date > GETDATE()) 
-                    THEN ROUND(p.price - (p.price * d.discount_percent / 100), 2)
-                    ELSE p.price
-                END as discounted_price,
-                CASE 
-                    WHEN d.id IS NOT NULL AND (d.end_date IS NULL OR d.end_date > GETDATE()) 
+                    WHEN d.id IS NOT NULL AND d.is_active = 1 AND (d.end_date IS NULL OR d.end_date > GETDATE()) 
                     THEN 1
                     ELSE 0
-                END as has_discount
+                END as has_discount,
+                CASE 
+                    WHEN d.id IS NOT NULL AND d.is_active = 1 AND (d.end_date IS NULL OR d.end_date > GETDATE()) 
+                    THEN ROUND(p.price - (p.price * d.discount_percent / 100), 2)
+                    ELSE p.price
+                END as discounted_price
             FROM Products p
             LEFT JOIN Categories c ON p.categoryId = c.id
-            LEFT JOIN Discounts d ON p.id = d.productId AND d.is_active = 1
+            LEFT JOIN Discounts d ON p.id = d.productId
             WHERE p.categoryId = @categoryId
         `);
     
@@ -43,12 +43,11 @@ export async function findProductsByCategoryId(categoryId) {
         details: product.details,
         categoryId: product.categoryId,
         categoryName: product.categoryName,
-        availability: 1, // সব প্রোডাক্ট available দেখান
+        availability: product.availability === 1 || product.availability === true ? 1 : 0,
         has_discount: product.has_discount === 1,
         discount_percent: product.discount_percent,
         discount_end_date: product.end_date,
-        created_at: product.created_at,
-        updated_at: product.updated_at
+        created_at: product.created_at
     }));
 }
 
@@ -61,7 +60,7 @@ export async function findProductByIdAndCategoryId(productId, categoryId) {
             SELECT 
                 p.id,
                 p.name,
-                p.price as original_price,
+                p.price,
                 p.photo,
                 p.details,
                 p.availability,
@@ -71,18 +70,18 @@ export async function findProductByIdAndCategoryId(productId, categoryId) {
                 d.discount_percent,
                 d.end_date,
                 CASE 
-                    WHEN d.id IS NOT NULL AND (d.end_date IS NULL OR d.end_date > GETDATE()) 
-                    THEN ROUND(p.price - (p.price * d.discount_percent / 100), 2)
-                    ELSE p.price
-                END as discounted_price,
-                CASE 
-                    WHEN d.id IS NOT NULL AND (d.end_date IS NULL OR d.end_date > GETDATE()) 
+                    WHEN d.id IS NOT NULL AND d.is_active = 1 AND (d.end_date IS NULL OR d.end_date > GETDATE()) 
                     THEN 1
                     ELSE 0
-                END as has_discount
+                END as has_discount,
+                CASE 
+                    WHEN d.id IS NOT NULL AND d.is_active = 1 AND (d.end_date IS NULL OR d.end_date > GETDATE()) 
+                    THEN ROUND(p.price - (p.price * d.discount_percent / 100), 2)
+                    ELSE p.price
+                END as discounted_price
             FROM Products p
             LEFT JOIN Categories c ON p.categoryId = c.id
-            LEFT JOIN Discounts d ON p.id = d.productId AND d.is_active = 1
+            LEFT JOIN Discounts d ON p.id = d.productId
             WHERE p.id = @id AND p.categoryId = @categoryId
         `);
     
@@ -99,12 +98,11 @@ export async function findProductByIdAndCategoryId(productId, categoryId) {
         details: product.details,
         categoryId: product.categoryId,
         categoryName: product.categoryName,
-        availability: 1,
+        availability: product.availability === 1 || product.availability === true ? 1 : 0,
         has_discount: product.has_discount === 1,
         discount_percent: product.discount_percent,
         discount_end_date: product.end_date,
-        created_at: product.created_at,
-        updated_at: product.updated_at
+        created_at: product.created_at
     };
 }
 
@@ -151,7 +149,7 @@ export async function searchProducts(query) {
             SELECT 
                 p.id,
                 p.name,
-                p.price as original_price,
+                p.price,
                 p.photo,
                 p.details,
                 p.availability,
@@ -161,18 +159,18 @@ export async function searchProducts(query) {
                 d.discount_percent,
                 d.end_date,
                 CASE 
-                    WHEN d.id IS NOT NULL AND (d.end_date IS NULL OR d.end_date > GETDATE()) 
-                    THEN ROUND(p.price - (p.price * d.discount_percent / 100), 2)
-                    ELSE p.price
-                END as discounted_price,
-                CASE 
-                    WHEN d.id IS NOT NULL AND (d.end_date IS NULL OR d.end_date > GETDATE()) 
+                    WHEN d.id IS NOT NULL AND d.is_active = 1 AND (d.end_date IS NULL OR d.end_date > GETDATE()) 
                     THEN 1
                     ELSE 0
-                END as has_discount
+                END as has_discount,
+                CASE 
+                    WHEN d.id IS NOT NULL AND d.is_active = 1 AND (d.end_date IS NULL OR d.end_date > GETDATE()) 
+                    THEN ROUND(p.price - (p.price * d.discount_percent / 100), 2)
+                    ELSE p.price
+                END as discounted_price
             FROM Products p
             LEFT JOIN Categories c ON p.categoryId = c.id
-            LEFT JOIN Discounts d ON p.id = d.productId AND d.is_active = 1
+            LEFT JOIN Discounts d ON p.id = d.productId
             WHERE p.name LIKE @query COLLATE Latin1_General_CI_AI
             ORDER BY p.id
         `);
@@ -180,13 +178,13 @@ export async function searchProducts(query) {
     return result.recordset.map(product => ({
         id: product.id,
         name: product.name,
-        original_price: parseFloat(product.original_price),
-        price: product.has_discount ? parseFloat(product.discounted_price) : parseFloat(product.original_price),
+        original_price: parseFloat(product.price),
+        price: product.has_discount ? parseFloat(product.discounted_price) : parseFloat(product.price),
         photo: product.photo,
         details: product.details,
         categoryId: product.categoryId,
         categoryName: product.categoryName,
-        availability: 1,
+        availability: product.availability === 1 || product.availability === true ? 1 : 0,
         has_discount: product.has_discount === 1,
         discount_percent: product.discount_percent,
         discount_end_date: product.end_date,
@@ -202,7 +200,7 @@ export async function getProductById(id) {
             SELECT 
                 p.id,
                 p.name,
-                p.price as original_price,
+                p.price,
                 p.photo,
                 p.details,
                 p.availability,
@@ -214,18 +212,18 @@ export async function getProductById(id) {
                 d.discount_percent,
                 d.end_date,
                 CASE 
-                    WHEN d.id IS NOT NULL AND (d.end_date IS NULL OR d.end_date > GETDATE()) 
-                    THEN ROUND(p.price - (p.price * d.discount_percent / 100), 2)
-                    ELSE p.price
-                END as discounted_price,
-                CASE 
-                    WHEN d.id IS NOT NULL AND (d.end_date IS NULL OR d.end_date > GETDATE()) 
+                    WHEN d.id IS NOT NULL AND d.is_active = 1 AND (d.end_date IS NULL OR d.end_date > GETDATE()) 
                     THEN 1
                     ELSE 0
-                END as has_discount
+                END as has_discount,
+                CASE 
+                    WHEN d.id IS NOT NULL AND d.is_active = 1 AND (d.end_date IS NULL OR d.end_date > GETDATE()) 
+                    THEN ROUND(p.price - (p.price * d.discount_percent / 100), 2)
+                    ELSE p.price
+                END as discounted_price
             FROM Products p
             LEFT JOIN Categories c ON p.categoryId = c.id
-            LEFT JOIN Discounts d ON p.id = d.productId AND d.is_active = 1
+            LEFT JOIN Discounts d ON p.id = d.productId
             WHERE p.id = @id
         `);
     
@@ -236,13 +234,13 @@ export async function getProductById(id) {
     return {
         id: product.id,
         name: product.name,
-        original_price: parseFloat(product.original_price),
-        price: product.has_discount ? parseFloat(product.discounted_price) : parseFloat(product.original_price),
+        original_price: parseFloat(product.price),
+        price: product.has_discount ? parseFloat(product.discounted_price) : parseFloat(product.price),
         photo: product.photo,
         details: product.details,
         categoryId: product.categoryId,
         categoryName: product.categoryName,
-        availability: 1,
+        availability: product.availability === 1 || product.availability === true ? 1 : 0,
         has_discount: product.has_discount === 1,
         discount_percent: product.discount_percent,
         discount_end_date: product.end_date,
@@ -307,21 +305,20 @@ export async function deleteProductById(id) {
 
     try {
         await transaction.begin();
-        const request = new sql.Request(transaction);
 
-        await request
+        await new sql.Request(transaction)
             .input('product_id', sql.Int, id)
             .query('DELETE FROM OrderItems WHERE product_id = @product_id');
 
-        await request
+        await new sql.Request(transaction)
             .input('productId', sql.Int, id)
             .query('DELETE FROM CartProducts WHERE productId = @productId');
 
-        await request
+        await new sql.Request(transaction)
             .input('productId', sql.Int, id)
             .query('DELETE FROM Discounts WHERE productId = @productId');
 
-        const result = await request
+        const result = await new sql.Request(transaction)
             .input('id', sql.Int, id)
             .query('DELETE FROM Products WHERE id = @id');
 

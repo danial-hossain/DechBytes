@@ -45,33 +45,24 @@ const CATEGORY_CONFIG = [
   },
 ];
 
-const AVAILABILITY_OPTIONS = ["In Stock", "Pre Order", "Up Coming"];
+const AVAILABILITY_OPTIONS = ["In Stock", "Out of Stock"];
 
 const getCategoryFromPath = (pathname) => {
   const match = CATEGORY_CONFIG.find((item) => item.route === pathname);
   return match?.key || "desktops";
 };
 
+// ✅ সরলীকৃত parseAvailability - শুধু availability কলাম ব্যবহার করে
 const parseAvailability = (product) => {
-  const candidates = [
-    product.availability,
-    product.stockStatus,
-    product.status,
-    product.stock_status,
-  ]
-    .filter(Boolean)
-    .map((value) => String(value).toLowerCase());
-
-  if (candidates.some((value) => value.includes("pre"))) return "Pre Order";
-  if (candidates.some((value) => value.includes("up") || value.includes("coming"))) return "Up Coming";
-  if (candidates.some((value) => value.includes("stock") || value.includes("available"))) return "In Stock";
-
-  const quantity = Number(product.quantity ?? product.stock ?? product.qty ?? 0);
-  if (Number.isFinite(quantity)) {
-    if (quantity > 0) return "In Stock";
-    if (quantity === 0) return "Up Coming";
+  const availability = product.availability;
+  
+  if (availability === 1 || availability === true) {
+    return "In Stock";
   }
-
+  if (availability === 0 || availability === false) {
+    return "Out of Stock";
+  }
+  
   return "In Stock";
 };
 
@@ -118,6 +109,10 @@ const ProductListing = () => {
           id: product.id ?? product._id,
           _id: product._id ?? product.id,
           price: Number(product.price || 0),
+          original_price: Number(product.original_price || product.price || 0),
+          has_discount: product.has_discount === true || product.has_discount === 1,
+          discount_percent: product.discount_percent || 0,
+          discounted_price: product.discounted_price || product.price,
           availabilityLabel: parseAvailability(product),
         }));
 
@@ -225,8 +220,8 @@ const ProductListing = () => {
               </div>
             </div>
             <div className="price-boxes">
-              <div className="price-box">{priceMin.toLocaleString()}</div>
-              <div className="price-box">{priceMax.toLocaleString()}</div>
+              <div className="price-box">${priceMin.toLocaleString()}</div>
+              <div className="price-box">${priceMax.toLocaleString()}</div>
             </div>
           </div>
 
@@ -271,8 +266,8 @@ const ProductListing = () => {
                 onChange={(event) => setSortBy(event.target.value)}
               >
                 <option value="default">Default</option>
-                <option value="price-low">Price (Low &gt; High)</option>
-                <option value="price-high">Price (High &gt; Low)</option>
+                <option value="price-low">Price (Low to High)</option>
+                <option value="price-high">Price (High to Low)</option>
               </select>
             </div>
           </div>
@@ -289,29 +284,65 @@ const ProductListing = () => {
                 <p className="listing-message">No products found for selected filters.</p>
               ) : (
                 <div className="products-grid">
-                  {visibleProducts.map((product) => (
-                    <div className="product-card" key={product.id}>
-                      <img
-                        src={product.photo || "https://via.placeholder.com/300x200?text=No+Image"}
-                        alt={product.name}
-                        onClick={() =>
-                          navigate(`/product/${selectedCategoryConfig?.detailSlug || "desktops"}/${product.id}`)
-                        }
-                      />
-                      <h3
-                        onClick={() =>
-                          navigate(`/product/${selectedCategoryConfig?.detailSlug || "desktops"}/${product.id}`)
-                        }
-                      >
-                        {product.name}
-                      </h3>
-                      <p className="product-price">${product.price.toLocaleString()}</p>
-                      <p className="product-availability">{product.availabilityLabel}</p>
-                      <button onClick={() => handleAddToCart(product.id)} type="button">
-                        Add to Cart
-                      </button>
-                    </div>
-                  ))}
+                  {visibleProducts.map((product) => {
+                    const hasDiscount = product.has_discount === true;
+                    const originalPrice = parseFloat(product.original_price).toFixed(2);
+                    const finalPrice = hasDiscount 
+                      ? parseFloat(product.discounted_price).toFixed(2)
+                      : parseFloat(product.price).toFixed(2);
+                    const discountPercent = product.discount_percent || 0;
+
+                    return (
+                      <div className="product-card" key={product.id}>
+                        {/* Discount Badge */}
+                        {hasDiscount && (
+                          <div className="product-discount-badge">
+                            -{discountPercent}% OFF
+                          </div>
+                        )}
+                        
+                        <img
+                          src={product.photo || "https://via.placeholder.com/300x200?text=No+Image"}
+                          alt={product.name}
+                          onClick={() =>
+                            navigate(`/product/${selectedCategoryConfig?.detailSlug || "desktops"}/${product.id}`)
+                          }
+                          style={{ cursor: "pointer" }}
+                        />
+                        <h3
+                          onClick={() =>
+                            navigate(`/product/${selectedCategoryConfig?.detailSlug || "desktops"}/${product.id}`)
+                          }
+                          style={{ cursor: "pointer" }}
+                        >
+                          {product.name}
+                        </h3>
+                        
+                        {/* Price Section with Discount */}
+                        <div className="product-price-section">
+                          {hasDiscount ? (
+                            <>
+                              <span className="product-discounted-price">${finalPrice}</span>
+                              <span className="product-original-price">${originalPrice}</span>
+                            </>
+                          ) : (
+                            <span className="product-regular-price">${finalPrice}</span>
+                          )}
+                        </div>
+                        
+                        {hasDiscount && (
+                          <p className="product-saved-amount">
+                            💰 Save: ${(originalPrice - finalPrice).toFixed(2)}
+                          </p>
+                        )}
+                        
+                        <p className="product-availability">{product.availabilityLabel}</p>
+                        <button onClick={() => handleAddToCart(product.id)} type="button">
+                          Add to Cart
+                        </button>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </>

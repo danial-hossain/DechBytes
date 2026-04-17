@@ -316,3 +316,66 @@
     font-size: 22px;
   }
 }
+/* src/Pages/ProductDetail/style.css */
+
+/* Discount Badge on Detail Page */
+.product-image {
+  position: relative;
+}
+
+.detail-discount-badge {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 30px;
+  font-size: 16px;
+  font-weight: bold;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* Price Section Detail */
+.price-section-detail {
+  margin: 15px 0;
+}
+
+.original-price-detail {
+  text-decoration: line-through;
+  color: #9ca3af;
+  font-size: 20px;
+  margin-right: 15px;
+}
+
+.discounted-price-detail {
+  color: #e11d48;
+  font-weight: bold;
+  font-size: 32px;
+}
+
+.regular-price-detail {
+  color: #1e3a8a;
+  font-weight: bold;
+  font-size: 32px;
+}
+
+.saved-amount-detail {
+  background: #d1fae5;
+  color: #065f46;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  display: inline-block;
+  margin: 10px 0;
+}
+
+.discount-end-date-detail {
+  font-size: 14px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #f0fdf4;
+  color: #166534;
+  margin: 10px 0;
+}
